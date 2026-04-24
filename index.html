@@ -1,0 +1,269 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>IOpened — Value Proposition</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --gold: #DAA520;
+    --gold-lt: #f0c84a;
+    --ink: #0a0c10;
+    --ink-2: #1c2030;
+    --muted: #4a5068;
+    --rule: rgba(255,255,255,0.08);
+    --white: #ffffff;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'DM Sans', sans-serif;
+    background: var(--ink);
+    color: var(--white);
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 40px 24px;
+    overflow-x: hidden;
+  }
+
+  /* Subtle grain overlay */
+  body::before {
+    content: '';
+    position: fixed; inset: 0;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.04'/%3E%3C/svg%3E");
+    pointer-events: none; z-index: 0;
+  }
+
+  .slide {
+    position: relative; z-index: 1;
+    width: 100%; max-width: 960px;
+  }
+
+  /* Header */
+  .header {
+    display: flex; align-items: flex-end; justify-content: space-between;
+    margin-bottom: 48px;
+    padding-bottom: 24px;
+    border-bottom: 1px solid var(--rule);
+    animation: fadeUp 0.6s ease both;
+  }
+  .logo-block {}
+  .logo-eyebrow {
+    font-size: 10px; font-weight: 600; letter-spacing: 0.18em;
+    text-transform: uppercase; color: var(--gold); margin-bottom: 6px;
+    font-family: 'DM Mono', monospace;
+  }
+  .logo {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 52px; line-height: 1; letter-spacing: 0.02em;
+    color: var(--white);
+  }
+  .logo span { color: var(--gold); }
+  .tagline {
+    font-size: 13px; color: rgba(255,255,255,0.45);
+    font-weight: 400; text-align: right; line-height: 1.6; max-width: 260px;
+  }
+
+  /* One-liner */
+  .hero-line {
+    font-size: 22px; font-weight: 300; line-height: 1.55;
+    color: rgba(255,255,255,0.85);
+    margin-bottom: 48px;
+    max-width: 720px;
+    border-left: 3px solid var(--gold);
+    padding-left: 20px;
+    animation: fadeUp 0.6s 0.1s ease both;
+  }
+  .hero-line strong { color: var(--white); font-weight: 600; }
+
+  /* Three pillars */
+  .pillars {
+    display: grid; grid-template-columns: repeat(3, 1fr);
+    gap: 2px; margin-bottom: 32px;
+  }
+  .pillar {
+    background: var(--ink-2);
+    padding: 28px 26px;
+    position: relative; overflow: hidden;
+    animation: fadeUp 0.6s ease both;
+  }
+  .pillar:nth-child(1) { animation-delay: 0.15s; border-radius: 8px 0 0 8px; }
+  .pillar:nth-child(2) { animation-delay: 0.25s; }
+  .pillar:nth-child(3) { animation-delay: 0.35s; border-radius: 0 8px 8px 0; }
+
+  .pillar::before {
+    content: '';
+    position: absolute; top: 0; left: 0; right: 0;
+    height: 2px; background: var(--gold); opacity: 0.7;
+  }
+
+  .pillar-num {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 56px; color: rgba(218,165,32,0.12);
+    line-height: 1; margin-bottom: -8px; display: block;
+  }
+  .pillar-title {
+    font-size: 13px; font-weight: 600;
+    text-transform: uppercase; letter-spacing: 0.07em;
+    color: var(--gold-lt); margin-bottom: 12px; line-height: 1.4;
+  }
+  .pillar-body {
+    font-size: 12.5px; color: rgba(255,255,255,0.65);
+    line-height: 1.7; font-weight: 300;
+  }
+  .pillar-body strong { color: rgba(255,255,255,0.9); font-weight: 500; }
+
+  /* What it is / isn't */
+  .two-col {
+    display: grid; grid-template-columns: 1fr 1fr;
+    gap: 2px; margin-bottom: 32px;
+    animation: fadeUp 0.6s 0.4s ease both;
+  }
+  .col-box {
+    background: var(--ink-2);
+    padding: 22px 24px;
+  }
+  .col-box:first-child { border-radius: 8px 0 0 8px; }
+  .col-box:last-child  { border-radius: 0 8px 8px 0; }
+
+  .col-title {
+    font-size: 10px; font-weight: 600; text-transform: uppercase;
+    letter-spacing: 0.12em; margin-bottom: 14px; font-family: 'DM Mono', monospace;
+  }
+  .col-title.yes { color: #4ade80; }
+  .col-title.no  { color: #f87171; }
+
+  .col-list { list-style: none; display: flex; flex-direction: column; gap: 8px; }
+  .col-list li {
+    font-size: 12px; color: rgba(255,255,255,0.65);
+    display: flex; align-items: flex-start; gap: 9px; line-height: 1.5;
+  }
+  .col-list li .dot {
+    width: 6px; height: 6px; border-radius: 50%;
+    flex-shrink: 0; margin-top: 5px;
+  }
+  .col-list.yes-list .dot { background: #4ade80; }
+  .col-list.no-list .dot  { background: #f87171; }
+
+  /* Footer */
+  .footer {
+    margin-top: 28px;
+    display: flex; align-items: center; justify-content: space-between;
+    padding-top: 20px; border-top: 1px solid var(--rule);
+    animation: fadeUp 0.6s 0.6s ease both;
+  }
+  .footer-note { font-size: 10px; color: rgba(255,255,255,0.25); font-family: 'DM Mono', monospace; }
+
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(14px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+</style>
+</head>
+<body>
+<div class="slide">
+
+  <!-- HEADER -->
+  <div class="header">
+    <div class="logo-block">
+      <div class="logo-eyebrow">Procurement Intelligence</div>
+      <div class="logo">IOpen<span>ed</span></div>
+    </div>
+    <div class="tagline">Semiconductor procurement intelligence<br>powered by public disclosures &amp; market data</div>
+  </div>
+
+  <!-- ONE-LINER -->
+  <div class="hero-line">
+    IOpened gives commodity managers <strong>supplier intelligence tied to their spend</strong> — so they know which supplier to push, when the window is open, and what to cite.
+  </div>
+
+  <!-- THREE PILLARS -->
+  <!-- Data sources strip -->
+  <div style="display:flex;gap:8px;margin-bottom:28px;flex-wrap:wrap;animation:fadeUp 0.6s 0.12s ease both;">
+    <div style="font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.12em;color:rgba(255,255,255,.3);font-family:'DM Mono',monospace;display:flex;align-items:center;margin-right:4px;">Sources</div>
+    <span style="font-size:11px;padding:3px 11px;border-radius:4px;background:rgba(255,255,255,.06);color:rgba(255,255,255,.65);border:1px solid rgba(255,255,255,.1);font-family:'DM Mono',monospace;">10-K / 20-F Filings</span>
+    <span style="font-size:11px;padding:3px 11px;border-radius:4px;background:rgba(255,255,255,.06);color:rgba(255,255,255,.65);border:1px solid rgba(255,255,255,.1);font-family:'DM Mono',monospace;">Earnings Transcripts</span>
+    <span style="font-size:11px;padding:3px 11px;border-radius:4px;background:rgba(218,165,32,.14);color:#DAA520;border:1px solid rgba(218,165,32,.28);font-family:'DM Mono',monospace;">⚡ Source Engine Lead Times</span>
+    <span style="font-size:11px;padding:3px 11px;border-radius:4px;background:rgba(255,255,255,.06);color:rgba(255,255,255,.65);border:1px solid rgba(255,255,255,.1);font-family:'DM Mono',monospace;">Press Releases</span>
+    <span style="font-size:11px;padding:3px 11px;border-radius:4px;background:rgba(255,255,255,.06);color:rgba(255,255,255,.65);border:1px solid rgba(255,255,255,.1);font-family:'DM Mono',monospace;">Industry Reports</span>
+  </div>
+
+  <div class="pillars">
+
+    <div class="pillar">
+      <span class="pillar-num">01</span>
+      <div class="pillar-title">Timing your leverage window</div>
+      <div class="pillar-body">
+        <ul style="list-style:none;display:flex;flex-direction:column;gap:8px;padding:0;">
+          <li style="display:flex;gap:8px;align-items:flex-start;"><span style="color:var(--gold);flex-shrink:0;">·</span>Supplier leverage windows are short — a distressed supplier today may be recovering in two quarters</li>
+          <li style="display:flex;gap:8px;align-items:flex-start;"><span style="color:var(--gold);flex-shrink:0;">·</span>Scores each supplier on margin pressure, FCF trajectory and revenue cycle — with a specific recommended action per supplier</li>
+          <li style="display:flex;gap:8px;align-items:flex-start;"><span style="color:var(--gold);flex-shrink:0;">·</span>Every score backed by a verbatim CFO quote or filing data point — not a model output</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="pillar">
+      <span class="pillar-num">02</span>
+      <div class="pillar-title">Intelligence you can cite in the room</div>
+      <div class="pillar-body">
+        <ul style="list-style:none;display:flex;flex-direction:column;gap:8px;padding:0;">
+          <li style="display:flex;gap:8px;align-items:flex-start;"><span style="color:var(--gold);flex-shrink:0;">·</span>10-K / 20-F filings, earnings transcripts, distributor pricing and lead time data — synthesised per commodity</li>
+          <li style="display:flex;gap:8px;align-items:flex-start;"><span style="color:var(--gold);flex-shrink:0;">·</span>Three-tier evidence grading: confirmed from filing · derived from analysis · working assumption</li>
+          <li style="display:flex;gap:8px;align-items:flex-start;"><span style="color:var(--gold);flex-shrink:0;">·</span>Weeks of research analyst time delivered in a single dashboard — refreshed bi-annually</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="pillar">
+      <span class="pillar-num">03</span>
+      <div class="pillar-title">Supply chain risk, not just pricing</div>
+      <div class="pillar-body">
+        <ul style="list-style:none;display:flex;flex-direction:column;gap:8px;padding:0;">
+          <li style="display:flex;gap:8px;align-items:flex-start;"><span style="color:var(--gold);flex-shrink:0;">·</span>Fab footprint, wafer migration and JV dependencies — who is exposed to TSMC, who is on legacy nodes</li>
+          <li style="display:flex;gap:8px;align-items:flex-start;"><span style="color:var(--gold);flex-shrink:0;">·</span>China competition monitor — domestic supplier threat level and technology readiness by product category</li>
+          <li style="display:flex;gap:8px;align-items:flex-start;"><span style="color:var(--gold);flex-shrink:0;">·</span>Supply chain intelligence as a negotiation argument — not just a risk register</li>
+        </ul>
+      </div>
+    </div>
+
+  </div>
+
+  </div>
+
+  <!-- WHAT IT IS / ISN'T -->
+  <div class="two-col">
+    <div class="col-box">
+      <div class="col-title yes">What IOpened is</div>
+      <ul class="col-list yes-list">
+        <li><div class="dot"></div>Supplier leverage scoring — grounded in public filings, not assumptions</li>
+        <li><div class="dot"></div>Financial cycle analysis — GM trajectory, FCF pressure, revenue position</li>
+        <li><div class="dot"></div>Fab footprint &amp; China competition — supply chain risk as a negotiation tool</li>
+        <li><div class="dot"></div>Distributor vs direct pricing — market price benchmarks per part number</li>
+        <li><div class="dot"></div>Per-supplier playbook — when to act, what to cite, what to ask for</li>
+      </ul>
+    </div>
+    <div class="col-box">
+      <div class="col-title no">What IOpened is not</div>
+      <ul class="col-list no-list">
+        <li><div class="dot"></div>A real-time pricing feed or live market data terminal</li>
+        <li><div class="dot"></div>A sourcing or procurement execution platform</li>
+        <li><div class="dot"></div>A consulting retainer or professional services engagement</li>
+        <li><div class="dot"></div>Generic research — every insight is tied to your actual spend</li>
+        <li><div class="dot"></div>No IT integration, no onboarding, no implementation project</li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- FOOTER -->
+  <div class="footer">
+    <div class="footer-note">POC: Power Management · $28M spend · TI · NXP · IFX · STM · ADI · FY2025</div>
+    
+  </div>
+
+</div>
+</body>
+</html>

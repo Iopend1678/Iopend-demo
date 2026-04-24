@@ -3,265 +3,523 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>IOpened — Value Proposition</title>
-<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<title>IOpened — Supplier Intelligence POC</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Fraunces:ital,wght@0,300;0,600;1,300&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
 <style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
   :root {
-    --gold: #DAA520;
-    --gold-lt: #f0c84a;
-    --ink: #0a0c10;
-    --ink-2: #1c2030;
-    --muted: #4a5068;
-    --rule: rgba(255,255,255,0.08);
-    --white: #ffffff;
+    --bg: #0d0f14;
+    --surface: #13161e;
+    --surface2: #1a1e28;
+    --border: rgba(255,255,255,0.07);
+    --gold: #c9a84c;
+    --gold-dim: rgba(201,168,76,0.15);
+    --gold-glow: rgba(201,168,76,0.08);
+    --ink: #e8eaf0;
+    --ink-2: #9ca3b0;
+    --ink-3: #5c6270;
+    --green: #4ade80;
+    --red: #f87171;
   }
 
-  * { box-sizing: border-box; margin: 0; padding: 0; }
-
   body {
+    background: var(--bg);
+    color: var(--ink);
     font-family: 'DM Sans', sans-serif;
-    background: var(--ink);
-    color: var(--white);
+    font-weight: 300;
     min-height: 100vh;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    padding: 40px 24px;
     overflow-x: hidden;
   }
 
-  /* Subtle grain overlay */
+  /* ── Background texture ── */
   body::before {
     content: '';
-    position: fixed; inset: 0;
-    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.04'/%3E%3C/svg%3E");
-    pointer-events: none; z-index: 0;
+    position: fixed;
+    inset: 0;
+    background:
+      radial-gradient(ellipse 80% 50% at 50% -10%, rgba(201,168,76,0.07) 0%, transparent 60%),
+      radial-gradient(ellipse 40% 30% at 80% 80%, rgba(201,168,76,0.04) 0%, transparent 50%);
+    pointer-events: none;
+    z-index: 0;
   }
 
-  .slide {
-    position: relative; z-index: 1;
-    width: 100%; max-width: 960px;
+  /* ── Grid lines ── */
+  body::after {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image:
+      linear-gradient(rgba(255,255,255,0.015) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(255,255,255,0.015) 1px, transparent 1px);
+    background-size: 60px 60px;
+    pointer-events: none;
+    z-index: 0;
   }
 
-  /* Header */
-  .header {
-    display: flex; align-items: flex-end; justify-content: space-between;
-    margin-bottom: 48px;
-    padding-bottom: 24px;
-    border-bottom: 1px solid var(--rule);
+  .wrap {
+    position: relative;
+    z-index: 1;
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 80px 32px 60px;
+  }
+
+  /* ── Header ── */
+  .logo-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 56px;
     animation: fadeUp 0.6s ease both;
   }
-  .logo-block {}
-  .logo-eyebrow {
-    font-size: 10px; font-weight: 600; letter-spacing: 0.18em;
-    text-transform: uppercase; color: var(--gold); margin-bottom: 6px;
+
+  .logo-mark {
+    width: 36px;
+    height: 36px;
+    border: 1.5px solid var(--gold);
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
     font-family: 'DM Mono', monospace;
-  }
-  .logo {
-    font-family: 'Bebas Neue', sans-serif;
-    font-size: 52px; line-height: 1; letter-spacing: 0.02em;
-    color: var(--white);
-  }
-  .logo span { color: var(--gold); }
-  .tagline {
-    font-size: 13px; color: rgba(255,255,255,0.45);
-    font-weight: 400; text-align: right; line-height: 1.6; max-width: 260px;
+    font-size: 14px;
+    color: var(--gold);
+    font-weight: 500;
   }
 
-  /* One-liner */
-  .hero-line {
-    font-size: 22px; font-weight: 300; line-height: 1.55;
-    color: rgba(255,255,255,0.85);
-    margin-bottom: 48px;
-    max-width: 720px;
-    border-left: 3px solid var(--gold);
-    padding-left: 20px;
+  .logo-text {
+    font-family: 'DM Mono', monospace;
+    font-size: 15px;
+    font-weight: 500;
+    color: var(--ink);
+    letter-spacing: 0.05em;
+  }
+
+  .logo-text span { color: var(--gold); }
+
+  .poc-badge {
+    margin-left: auto;
+    font-family: 'DM Mono', monospace;
+    font-size: 10px;
+    color: var(--gold);
+    border: 1px solid rgba(201,168,76,0.3);
+    padding: 4px 10px;
+    border-radius: 4px;
+    letter-spacing: 0.08em;
+    background: var(--gold-glow);
+  }
+
+  /* ── Hero ── */
+  .hero {
+    margin-bottom: 56px;
     animation: fadeUp 0.6s 0.1s ease both;
   }
-  .hero-line strong { color: var(--white); font-weight: 600; }
 
-  /* Three pillars */
-  .pillars {
-    display: grid; grid-template-columns: repeat(3, 1fr);
-    gap: 2px; margin-bottom: 32px;
+  .hero-eyebrow {
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    color: var(--gold);
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    margin-bottom: 16px;
   }
-  .pillar {
-    background: var(--ink-2);
-    padding: 28px 26px;
-    position: relative; overflow: hidden;
-    animation: fadeUp 0.6s ease both;
-  }
-  .pillar:nth-child(1) { animation-delay: 0.15s; border-radius: 8px 0 0 8px; }
-  .pillar:nth-child(2) { animation-delay: 0.25s; }
-  .pillar:nth-child(3) { animation-delay: 0.35s; border-radius: 0 8px 8px 0; }
 
-  .pillar::before {
+  .hero-title {
+    font-family: 'Fraunces', Georgia, serif;
+    font-size: clamp(28px, 4vw, 44px);
+    font-weight: 300;
+    line-height: 1.2;
+    color: var(--ink);
+    margin-bottom: 20px;
+  }
+
+  .hero-title em {
+    font-style: italic;
+    color: var(--gold);
+  }
+
+  .hero-body {
+    font-size: 15px;
+    line-height: 1.7;
+    color: var(--ink-2);
+    max-width: 600px;
+  }
+
+  /* ── Context strip ── */
+  .context-strip {
+    display: flex;
+    gap: 0;
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    overflow: hidden;
+    margin-bottom: 48px;
+    animation: fadeUp 0.6s 0.2s ease both;
+  }
+
+  .ctx-item {
+    flex: 1;
+    padding: 16px 20px;
+    border-right: 1px solid var(--border);
+  }
+
+  .ctx-item:last-child { border-right: none; }
+
+  .ctx-label {
+    font-family: 'DM Mono', monospace;
+    font-size: 9px;
+    color: var(--ink-3);
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    margin-bottom: 6px;
+  }
+
+  .ctx-value {
+    font-size: 13px;
+    color: var(--ink);
+    font-weight: 400;
+  }
+
+  .ctx-value strong {
+    color: var(--gold);
+    font-weight: 500;
+  }
+
+  /* ── Section label ── */
+  .section-label {
+    font-family: 'DM Mono', monospace;
+    font-size: 10px;
+    color: var(--ink-3);
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    margin-bottom: 16px;
+    animation: fadeUp 0.6s 0.3s ease both;
+  }
+
+  /* ── Nav grid ── */
+  .nav-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+    margin-bottom: 48px;
+    animation: fadeUp 0.6s 0.35s ease both;
+  }
+
+  .nav-card {
+    display: block;
+    text-decoration: none;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 22px 24px;
+    transition: border-color 0.2s, background 0.2s, transform 0.2s;
+    cursor: pointer;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .nav-card::before {
     content: '';
-    position: absolute; top: 0; left: 0; right: 0;
-    height: 2px; background: var(--gold); opacity: 0.7;
+    position: absolute;
+    inset: 0;
+    background: var(--gold-glow);
+    opacity: 0;
+    transition: opacity 0.2s;
   }
 
-  .pillar-num {
-    font-family: 'Bebas Neue', sans-serif;
-    font-size: 56px; color: rgba(218,165,32,0.12);
-    line-height: 1; margin-bottom: -8px; display: block;
+  .nav-card:hover {
+    border-color: rgba(201,168,76,0.35);
+    background: var(--surface2);
+    transform: translateY(-2px);
   }
-  .pillar-title {
-    font-size: 13px; font-weight: 600;
-    text-transform: uppercase; letter-spacing: 0.07em;
-    color: var(--gold-lt); margin-bottom: 12px; line-height: 1.4;
-  }
-  .pillar-body {
-    font-size: 12.5px; color: rgba(255,255,255,0.65);
-    line-height: 1.7; font-weight: 300;
-  }
-  .pillar-body strong { color: rgba(255,255,255,0.9); font-weight: 500; }
 
-  /* What it is / isn't */
-  .two-col {
-    display: grid; grid-template-columns: 1fr 1fr;
-    gap: 2px; margin-bottom: 32px;
+  .nav-card:hover::before { opacity: 1; }
+
+  .nav-card:hover .nav-arrow { opacity: 1; transform: translate(2px, -2px); }
+
+  .nav-num {
+    font-family: 'DM Mono', monospace;
+    font-size: 10px;
+    color: var(--gold);
+    letter-spacing: 0.1em;
+    margin-bottom: 10px;
+    opacity: 0.8;
+  }
+
+  .nav-title {
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--ink);
+    margin-bottom: 6px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .nav-arrow {
+    margin-left: auto;
+    opacity: 0.3;
+    transition: opacity 0.2s, transform 0.2s;
+    font-size: 16px;
+    color: var(--gold);
+  }
+
+  .nav-desc {
+    font-size: 12px;
+    color: var(--ink-3);
+    line-height: 1.5;
+  }
+
+  .nav-tags {
+    display: flex;
+    gap: 6px;
+    flex-wrap: wrap;
+    margin-top: 12px;
+  }
+
+  .tag {
+    font-family: 'DM Mono', monospace;
+    font-size: 9px;
+    padding: 3px 7px;
+    border-radius: 3px;
+    background: rgba(255,255,255,0.04);
+    color: var(--ink-3);
+    border: 1px solid var(--border);
+    letter-spacing: 0.05em;
+  }
+
+  /* ── Pitch link ── */
+  .pitch-row {
     animation: fadeUp 0.6s 0.4s ease both;
   }
-  .col-box {
-    background: var(--ink-2);
-    padding: 22px 24px;
-  }
-  .col-box:first-child { border-radius: 8px 0 0 8px; }
-  .col-box:last-child  { border-radius: 0 8px 8px 0; }
 
-  .col-title {
-    font-size: 10px; font-weight: 600; text-transform: uppercase;
-    letter-spacing: 0.12em; margin-bottom: 14px; font-family: 'DM Mono', monospace;
+  .pitch-card {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    background: var(--gold-dim);
+    border: 1px solid rgba(201,168,76,0.25);
+    border-radius: 10px;
+    padding: 18px 24px;
+    text-decoration: none;
+    transition: background 0.2s, border-color 0.2s;
   }
-  .col-title.yes { color: #4ade80; }
-  .col-title.no  { color: #f87171; }
 
-  .col-list { list-style: none; display: flex; flex-direction: column; gap: 8px; }
-  .col-list li {
-    font-size: 12px; color: rgba(255,255,255,0.65);
-    display: flex; align-items: flex-start; gap: 9px; line-height: 1.5;
+  .pitch-card:hover {
+    background: rgba(201,168,76,0.2);
+    border-color: rgba(201,168,76,0.4);
   }
-  .col-list li .dot {
-    width: 6px; height: 6px; border-radius: 50%;
-    flex-shrink: 0; margin-top: 5px;
-  }
-  .col-list.yes-list .dot { background: #4ade80; }
-  .col-list.no-list .dot  { background: #f87171; }
 
-  /* Footer */
-  .footer {
-    margin-top: 28px;
-    display: flex; align-items: center; justify-content: space-between;
-    padding-top: 20px; border-top: 1px solid var(--rule);
-    animation: fadeUp 0.6s 0.6s ease both;
+  .pitch-icon {
+    font-size: 20px;
+    flex-shrink: 0;
   }
-  .footer-note { font-size: 10px; color: rgba(255,255,255,0.25); font-family: 'DM Mono', monospace; }
+
+  .pitch-text { flex: 1; }
+
+  .pitch-title {
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--gold);
+    margin-bottom: 3px;
+  }
+
+  .pitch-sub {
+    font-size: 11px;
+    color: var(--ink-3);
+  }
+
+  .pitch-arrow {
+    font-size: 18px;
+    color: var(--gold);
+    opacity: 0.6;
+  }
+
+  /* ── Disclaimer ── */
+  .disclaimer {
+    margin-top: 48px;
+    padding-top: 24px;
+    border-top: 1px solid var(--border);
+    font-family: 'DM Mono', monospace;
+    font-size: 10px;
+    color: var(--ink-3);
+    line-height: 1.6;
+    animation: fadeUp 0.6s 0.5s ease both;
+  }
+
+  .disclaimer strong { color: var(--ink-2); }
+
+  /* ── Evidence legend ── */
+  .evidence-row {
+    display: flex;
+    gap: 16px;
+    flex-wrap: wrap;
+    margin-top: 40px;
+    margin-bottom: 0;
+    animation: fadeUp 0.6s 0.45s ease both;
+  }
+
+  .ev-item {
+    display: flex;
+    align-items: center;
+    gap:6px;
+    font-family: 'DM Mono', monospace;
+    font-size: 10px;
+    color: var(--ink-3);
+  }
+
+  .ev-dot {
+    width: 8px; height: 8px; border-radius: 50%;
+    flex-shrink: 0;
+  }
 
   @keyframes fadeUp {
-    from { opacity: 0; transform: translateY(14px); }
+    from { opacity: 0; transform: translateY(16px); }
     to   { opacity: 1; transform: translateY(0); }
+  }
+
+  @media (max-width: 600px) {
+    .nav-grid { grid-template-columns: 1fr; }
+    .context-strip { flex-direction: column; }
+    .ctx-item { border-right: none; border-bottom: 1px solid var(--border); }
+    .ctx-item:last-child { border-bottom: none; }
+    .wrap { padding: 48px 20px 40px; }
   }
 </style>
 </head>
 <body>
-<div class="slide">
+<div class="wrap">
 
-  <!-- HEADER -->
-  <div class="header">
-    <div class="logo-block">
-      <div class="logo-eyebrow">Procurement Intelligence</div>
-      <div class="logo">IOpen<span>ed</span></div>
+  <!-- Logo -->
+  <div class="logo-row">
+    <div class="logo-mark">IO</div>
+    <div class="logo-text">I<span>Opened</span></div>
+    <div class="poc-badge">PROOF OF CONCEPT</div>
+  </div>
+
+  <!-- Hero -->
+  <div class="hero">
+    <div class="hero-eyebrow">Supplier Intelligence · Power Management ICs</div>
+    <h1 class="hero-title">Procurement intelligence<br>for <em>semiconductor negotiations</em></h1>
+    <p class="hero-body">
+      This is a proof of concept built for a fictitious company — <strong style="color:var(--ink)">ABC Semiconductor</strong> — spending approximately $28M annually on power management ICs across five suppliers. All financial data is sourced from public filings (10-K / 20-F) and earnings transcripts. Intelligence is spend-specific and tied to actual MPN-level procurement.
+    </p>
+  </div>
+
+  <!-- Context strip -->
+  <div class="context-strip">
+    <div class="ctx-item">
+      <div class="ctx-label">Fictitious Buyer</div>
+      <div class="ctx-value"><strong>ABC Semiconductor</strong></div>
     </div>
-    <div class="tagline">Semiconductor procurement intelligence<br>powered by public disclosures &amp; market data</div>
+    <div class="ctx-item">
+      <div class="ctx-label">Annual Spend</div>
+      <div class="ctx-value"><strong>$28.05M</strong> · Power Mgmt ICs</div>
+    </div>
+    <div class="ctx-item">
+      <div class="ctx-label">Suppliers Covered</div>
+      <div class="ctx-value"><strong>TI · NXP · IFX · STM · ADI</strong></div>
+    </div>
+    <div class="ctx-item">
+      <div class="ctx-label">Data Period</div>
+      <div class="ctx-value">FY2020 – <strong>FY2025</strong></div>
+    </div>
   </div>
 
-  <!-- ONE-LINER -->
-  <div class="hero-line">
-    IOpened gives commodity managers <strong>supplier intelligence tied to their spend</strong> — so they know which supplier to push, when the window is open, and what to cite.
-  </div>
+  <!-- Dashboard pages -->
+  <div class="section-label">Dashboard Pages</div>
+  <div class="nav-grid">
 
-  <!-- THREE PILLARS -->
-  <!-- Data sources strip -->
-  <div style="display:flex;gap:8px;margin-bottom:28px;flex-wrap:wrap;animation:fadeUp 0.6s 0.12s ease both;">
-    <div style="font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.12em;color:rgba(255,255,255,.3);font-family:'DM Mono',monospace;display:flex;align-items:center;margin-right:4px;">Sources</div>
-    <span style="font-size:11px;padding:3px 11px;border-radius:4px;background:rgba(255,255,255,.06);color:rgba(255,255,255,.65);border:1px solid rgba(255,255,255,.1);font-family:'DM Mono',monospace;">10-K / 20-F Filings</span>
-    <span style="font-size:11px;padding:3px 11px;border-radius:4px;background:rgba(255,255,255,.06);color:rgba(255,255,255,.65);border:1px solid rgba(255,255,255,.1);font-family:'DM Mono',monospace;">Earnings Transcripts</span>
-    <span style="font-size:11px;padding:3px 11px;border-radius:4px;background:rgba(218,165,32,.14);color:#DAA520;border:1px solid rgba(218,165,32,.28);font-family:'DM Mono',monospace;">⚡ Source Engine Lead Times</span>
-    <span style="font-size:11px;padding:3px 11px;border-radius:4px;background:rgba(255,255,255,.06);color:rgba(255,255,255,.65);border:1px solid rgba(255,255,255,.1);font-family:'DM Mono',monospace;">Press Releases</span>
-    <span style="font-size:11px;padding:3px 11px;border-radius:4px;background:rgba(255,255,255,.06);color:rgba(255,255,255,.65);border:1px solid rgba(255,255,255,.1);font-family:'DM Mono',monospace;">Industry Reports</span>
-  </div>
-
-  <div class="pillars">
-
-    <div class="pillar">
-      <span class="pillar-num">01</span>
-      <div class="pillar-title">Timing your leverage window</div>
-      <div class="pillar-body">
-        <ul style="list-style:none;display:flex;flex-direction:column;gap:8px;padding:0;">
-          <li style="display:flex;gap:8px;align-items:flex-start;"><span style="color:var(--gold);flex-shrink:0;">·</span>Supplier leverage windows are short — a distressed supplier today may be recovering in two quarters</li>
-          <li style="display:flex;gap:8px;align-items:flex-start;"><span style="color:var(--gold);flex-shrink:0;">·</span>Scores each supplier on margin pressure, FCF trajectory and revenue cycle — with a specific recommended action per supplier</li>
-          <li style="display:flex;gap:8px;align-items:flex-start;"><span style="color:var(--gold);flex-shrink:0;">·</span>Every score backed by a verbatim CFO quote or filing data point — not a model output</li>
-        </ul>
+    <a class="nav-card" href="spend_page1.html">
+      <div class="nav-num">01 — SPEND</div>
+      <div class="nav-title">Spend Distribution <span class="nav-arrow">↗</span></div>
+      <div class="nav-desc">Spend breakdown by supplier and category. Geographic concentration, HHI risk scoring and supplier dependency analysis.</div>
+      <div class="nav-tags">
+        <span class="tag">$28M spend</span>
+        <span class="tag">HHI risk</span>
+        <span class="tag">5 suppliers</span>
       </div>
-    </div>
+    </a>
 
-    <div class="pillar">
-      <span class="pillar-num">02</span>
-      <div class="pillar-title">Intelligence you can cite in the room</div>
-      <div class="pillar-body">
-        <ul style="list-style:none;display:flex;flex-direction:column;gap:8px;padding:0;">
-          <li style="display:flex;gap:8px;align-items:flex-start;"><span style="color:var(--gold);flex-shrink:0;">·</span>10-K / 20-F filings, earnings transcripts, distributor pricing and lead time data — synthesised per commodity</li>
-          <li style="display:flex;gap:8px;align-items:flex-start;"><span style="color:var(--gold);flex-shrink:0;">·</span>Three-tier evidence grading: confirmed from filing · derived from analysis · working assumption</li>
-          <li style="display:flex;gap:8px;align-items:flex-start;"><span style="color:var(--gold);flex-shrink:0;">·</span>Weeks of research analyst time delivered in a single dashboard — refreshed bi-annually</li>
-        </ul>
+    <a class="nav-card" href="financials_page2.html">
+      <div class="nav-num">02 — FINANCIALS</div>
+      <div class="nav-title">Financial Analytics <span class="nav-arrow">↗</span></div>
+      <div class="nav-desc">GM Sensitivity, free cash flow, depreciation burden and fixed cost intensity per supplier. FY2020–FY2025 trend with year-by-year annotations.</div>
+      <div class="nav-tags">
+        <span class="tag">GM sensitivity</span>
+        <span class="tag">FCF</span>
+        <span class="tag">dep/COGS</span>
       </div>
-    </div>
+    </a>
 
-    <div class="pillar">
-      <span class="pillar-num">03</span>
-      <div class="pillar-title">Supply chain risk, not just pricing</div>
-      <div class="pillar-body">
-        <ul style="list-style:none;display:flex;flex-direction:column;gap:8px;padding:0;">
-          <li style="display:flex;gap:8px;align-items:flex-start;"><span style="color:var(--gold);flex-shrink:0;">·</span>Fab footprint, wafer migration and JV dependencies — who is exposed to TSMC, who is on legacy nodes</li>
-          <li style="display:flex;gap:8px;align-items:flex-start;"><span style="color:var(--gold);flex-shrink:0;">·</span>China competition monitor — domestic supplier threat level and technology readiness by product category</li>
-          <li style="display:flex;gap:8px;align-items:flex-start;"><span style="color:var(--gold);flex-shrink:0;">·</span>Supply chain intelligence as a negotiation argument — not just a risk register</li>
-        </ul>
+    <a class="nav-card" href="scorecard_all.html">
+      <div class="nav-num">03 — SCORECARD</div>
+      <div class="nav-title">Negotiation Leverage <span class="nav-arrow">↗</span></div>
+      <div class="nav-desc">Per-supplier leverage scoring with recommended negotiation posture, timing rationale and evidence-graded data points to cite in the room.</div>
+      <div class="nav-tags">
+        <span class="tag">ACT NOW</span>
+        <span class="tag">NEGOTIATE</span>
+        <span class="tag">MONITOR</span>
       </div>
-    </div>
+    </a>
+
+    <a class="nav-card" href="fab_footprint_page4.html">
+      <div class="nav-num">04 — FAB FOOTPRINT</div>
+      <div class="nav-title">Fab Footprint &amp; Risk <span class="nav-arrow">↗</span></div>
+      <div class="nav-desc">Wafer size migration, process node by product category, JV dependencies and TSMC exposure. Supply chain risk as a negotiation argument.</div>
+      <div class="nav-tags">
+        <span class="tag">300mm</span>
+        <span class="tag">TSMC</span>
+        <span class="tag">JV risk</span>
+      </div>
+    </a>
+
+    <a class="nav-card" href="china_competition_page5.html">
+      <div class="nav-num">05 — CHINA</div>
+      <div class="nav-title">China Competition <span class="nav-arrow">↗</span></div>
+      <div class="nav-desc">Domestic supplier threat level and technology readiness by product category. MOFCOM anti-dumping alerts and market share trajectory.</div>
+      <div class="nav-tags">
+        <span class="tag">YMTC</span>
+        <span class="tag">Southchip</span>
+        <span class="tag">threat level</span>
+      </div>
+    </a>
+
+    <a class="nav-card" href="iopened_pricing_spread.html">
+      <div class="nav-num">06 — PRICING</div>
+      <div class="nav-title">Distributor Pricing <span class="nav-arrow">↗</span></div>
+      <div class="nav-desc">Authorised distributor price ranges vs direct supplier pricing across 15 MPNs. Grey market broker flags and spread analysis by category.</div>
+      <div class="nav-tags">
+        <span class="tag">15 MPNs</span>
+        <span class="tag">direct vs dist</span>
+        <span class="tag">grey market</span>
+      </div>
+    </a>
 
   </div>
 
+  <!-- Pitch deck link -->
+  <div class="pitch-row">
+    <a class="pitch-card" href="iopenspend_pitch.html">
+      <div class="pitch-icon">📋</div>
+      <div class="pitch-text">
+        <div class="pitch-title">IOpened — Value Proposition</div>
+        <div class="pitch-sub">What the tool is, what it is not, and how it creates value for commodity managers</div>
+      </div>
+      <div class="pitch-arrow">→</div>
+    </a>
   </div>
 
-  <!-- WHAT IT IS / ISN'T -->
-  <div class="two-col">
-    <div class="col-box">
-      <div class="col-title yes">What IOpened is</div>
-      <ul class="col-list yes-list">
-        <li><div class="dot"></div>Supplier leverage scoring — grounded in public filings, not assumptions</li>
-        <li><div class="dot"></div>Financial cycle analysis — GM trajectory, FCF pressure, revenue position</li>
-        <li><div class="dot"></div>Fab footprint &amp; China competition — supply chain risk as a negotiation tool</li>
-        <li><div class="dot"></div>Distributor vs direct pricing — market price benchmarks per part number</li>
-        <li><div class="dot"></div>Per-supplier playbook — when to act, what to cite, what to ask for</li>
-      </ul>
-    </div>
-    <div class="col-box">
-      <div class="col-title no">What IOpened is not</div>
-      <ul class="col-list no-list">
-        <li><div class="dot"></div>A real-time pricing feed or live market data terminal</li>
-        <li><div class="dot"></div>A sourcing or procurement execution platform</li>
-        <li><div class="dot"></div>A consulting retainer or professional services engagement</li>
-        <li><div class="dot"></div>Generic research — every insight is tied to your actual spend</li>
-        <li><div class="dot"></div>No IT integration, no onboarding, no implementation project</li>
-      </ul>
-    </div>
+  <!-- Evidence legend -->
+  <div class="evidence-row">
+    <div class="ev-item"><div class="ev-dot" style="background:#4ade80"></div>✅ Confirmed from filing</div>
+    <div class="ev-item"><div class="ev-dot" style="background:#c9a84c"></div>🔢 Derived from analysis</div>
+    <div class="ev-item"><div class="ev-dot" style="background:#60a5fa"></div>◆ Working assumption</div>
   </div>
 
-  <!-- FOOTER -->
-  <div class="footer">
-    <div class="footer-note">POC: Power Management · $28M spend · TI · NXP · IFX · STM · ADI · FY2025</div>
-    
+  <!-- Disclaimer -->
+  <div class="disclaimer">
+    <strong>Disclaimer:</strong> This is a proof of concept built on a fictitious buyer ("ABC Semiconductor") with illustrative spend data. All supplier financial data is sourced from public filings (SEC 10-K, 20-F) and earnings transcripts. This tool does not constitute financial advice. In a live engagement, spend data, MPN mapping and supplier relationships would be specific to the actual client — materially improving the accuracy and relevance of all intelligence shown.
   </div>
 
 </div>

@@ -1,0 +1,717 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ABC Semiconductor — Procurement Intelligence</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/d3/7.8.5/d3.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/topojson/3.0.2/topojson.min.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --ink: #0f1117;
+    --ink-2: #2d3142;
+    --ink-3: #5c6078;
+    --rule: #e2e4ea;
+    --surface: #f7f8fc;
+    --white: #ffffff;
+    --ti:  #00D4C8;
+    --nxp: #DAA520;
+    --ifx: #404040;
+    --stm: #E87878;
+    --adi: #6a1b9a;
+    --accent: #1a3a5c;
+    --risk-hi: #c62828;
+    --risk-md: #e8a020;
+    --risk-lo: #2e7d32;
+    --fe: #1a3a5c;
+    --be: #7b9fc4;
+    --font: 'DM Sans', sans-serif;
+    --mono: 'DM Mono', monospace;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: var(--font); background: var(--surface); color: var(--ink); font-size: 13px; line-height: 1.5; }
+
+  /* ── NAV ──────────────────────────────────────────── */
+  nav {
+    background: var(--ink);
+    padding: 0 28px;
+    display: flex;
+    align-items: center;
+    gap: 0;
+    height: 48px;
+    position: sticky; top: 0; z-index: 100;
+  }
+  .nav-logo { color: #fff; font-size: 13px; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; margin-right: 36px; white-space: nowrap; }
+  .nav-logo span { color: var(--nxp); }
+  .nav-tabs { display: flex; height: 100%; }
+  .nav-tab {
+    color: rgba(255,255,255,0.5); font-size: 12px; font-weight: 500;
+    padding: 0 18px; display: flex; align-items: center; cursor: pointer;
+    border-bottom: 2px solid transparent; transition: all 0.15s; white-space: nowrap;
+    text-decoration: none;
+  }
+  .nav-tab:hover { color: rgba(255,255,255,0.85); }
+  .nav-tab.active { color: #fff; border-bottom-color: var(--nxp); }
+  .nav-right { margin-left: auto; color: rgba(255,255,255,0.4); font-size: 11px; font-family: var(--mono); }
+
+  /* ── PAGE ─────────────────────────────────────────── */
+  .page-header {
+    background: var(--white);
+    border-bottom: 1px solid var(--rule);
+    padding: 18px 28px 14px;
+    display: flex; align-items: flex-end; justify-content: space-between;
+  }
+  .page-title { font-size: 18px; font-weight: 600; color: var(--ink); }
+  .page-sub { font-size: 12px; color: var(--ink-3); margin-top: 2px; }
+  .pill {
+    font-size: 10px; font-weight: 500; font-family: var(--mono);
+    padding: 3px 10px; border-radius: 20px;
+    background: #fff8e1; color: #b45309; border: 1px solid #fde68a;
+  }
+
+  .main { padding: 20px 28px; display: grid; gap: 16px; }
+
+  /* ── KPI ROW ──────────────────────────────────────── */
+  .kpi-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; }
+  .kpi {
+    background: var(--white); border: 1px solid var(--rule);
+    border-radius: 8px; padding: 14px 16px;
+  }
+  .kpi-label { font-size: 10px; font-weight: 500; color: var(--ink-3); text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 6px; }
+  .kpi-value { font-size: 22px; font-weight: 600; color: var(--ink); line-height: 1; }
+  .kpi-sub { font-size: 11px; color: var(--ink-3); margin-top: 4px; }
+  .kpi-bar { height: 3px; background: var(--rule); border-radius: 2px; margin-top: 10px; overflow: hidden; }
+  .kpi-bar-fill { height: 100%; border-radius: 2px; }
+
+  /* ── GRID ─────────────────────────────────────────── */
+  .row-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+  .row-3 { display: grid; grid-template-columns: 2fr 1fr; gap: 16px; }
+
+  .card {
+    background: var(--white); border: 1px solid var(--rule);
+    border-radius: 8px; overflow: hidden;
+  }
+  .card-head {
+    padding: 12px 16px 10px;
+    border-bottom: 1px solid var(--rule);
+    display: flex; align-items: center; justify-content: space-between;
+  }
+  .card-title { font-size: 12px; font-weight: 600; color: var(--ink); text-transform: uppercase; letter-spacing: 0.05em; }
+  .card-body { padding: 16px; }
+
+  /* ── CHART ────────────────────────────────────────── */
+  .chart-wrap { position: relative; height: 240px; }
+
+  /* ── LEGEND ───────────────────────────────────────── */
+  .legend { display: flex; gap: 16px; flex-wrap: wrap; }
+  .legend-item { display: flex; align-items: center; gap: 6px; font-size: 11px; color: var(--ink-2); }
+  .legend-dot { width: 10px; height: 10px; border-radius: 2px; flex-shrink: 0; }
+
+  /* ── CONCENTRATION TABLE ──────────────────────────── */
+  .conc-table { width: 100%; border-collapse: collapse; }
+  .conc-table th {
+    font-size: 10px; font-weight: 600; color: var(--ink-3);
+    text-transform: uppercase; letter-spacing: 0.05em;
+    padding: 0 10px 8px 0; text-align: left; border-bottom: 1px solid var(--rule);
+  }
+  .conc-table td { padding: 7px 10px 7px 0; border-bottom: 1px solid var(--rule); font-size: 12px; }
+  .conc-table tr:last-child td { border-bottom: none; }
+  .conc-table .num { text-align: right; font-family: var(--mono); font-size: 11px; }
+  .share-bar { width: 80px; height: 6px; background: var(--rule); border-radius: 3px; overflow: hidden; display: inline-block; vertical-align: middle; }
+  .share-fill { height: 100%; border-radius: 3px; }
+
+  /* ── RISK BADGE ───────────────────────────────────── */
+  .risk {
+    display: inline-flex; align-items: center; gap: 4px;
+    font-size: 10px; font-weight: 600; padding: 2px 8px; border-radius: 20px;
+    font-family: var(--mono);
+  }
+  .risk-hi { background: #fef2f2; color: var(--risk-hi); border: 1px solid #fecaca; }
+  .risk-md { background: #fffbeb; color: #92400e; border: 1px solid #fde68a; }
+  .risk-lo { background: #f0fdf4; color: var(--risk-lo); border: 1px solid #bbf7d0; }
+  .risk-dot { width: 5px; height: 5px; border-radius: 50%; background: currentColor; }
+
+  /* ── RISK INSIGHTS ────────────────────────────────── */
+  .insight-list { display: flex; flex-direction: column; gap: 8px; }
+  .insight {
+    padding: 10px 12px; border-radius: 6px; font-size: 11px; line-height: 1.5;
+    border-left: 3px solid;
+  }
+  .insight-hi { background: #fef2f2; border-color: var(--risk-hi); color: #7f1d1d; }
+  .insight-md { background: #fffbeb; border-color: var(--risk-md); color: #78350f; }
+  .insight-lo { background: #f0fdf4; border-color: var(--risk-lo); color: #14532d; }
+  .insight strong { display: block; font-size: 11px; font-weight: 600; margin-bottom: 2px; }
+
+  /* ── MAP ─────────────────────────────────────────── */
+  .map-controls { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 12px; }
+  .map-btn {
+    font-size: 11px; font-weight: 500; padding: 4px 12px; border-radius: 20px;
+    border: 1px solid var(--rule); background: var(--surface); color: var(--ink-2);
+    cursor: pointer; transition: all 0.15s; font-family: var(--font);
+  }
+  .map-btn.active { background: var(--ink); color: #fff; border-color: var(--ink); }
+
+  /* SVG World Map */
+  .map-container { position: relative; width: 100%; }
+  .map-container svg { width: 100%; height: auto; }
+  .land { fill: #e8eaef; stroke: #fff; stroke-width: 0.5; }
+  .map-dot {
+    cursor: pointer; transition: r 0.15s, opacity 0.15s;
+  }
+  .map-dot:hover { opacity: 0.8; }
+  .map-tooltip {
+    position: absolute; background: var(--ink); color: #fff;
+    font-size: 11px; padding: 6px 10px; border-radius: 5px; pointer-events: none;
+    opacity: 0; transition: opacity 0.15s; white-space: nowrap; z-index: 10;
+    font-family: var(--font);
+  }
+  .map-legend { display: flex; gap: 16px; margin-top: 10px; }
+  .map-legend-item { display: flex; align-items: center; gap: 6px; font-size: 11px; color: var(--ink-2); }
+  .map-dot-legend { width: 10px; height: 10px; border-radius: 50%; }
+
+  /* ── MAKE VS BUY ──────────────────────────────────── */
+  .mvb-table { width: 100%; border-collapse: collapse; }
+  .mvb-table th {
+    font-size: 10px; font-weight: 600; color: var(--ink-3); text-transform: uppercase;
+    letter-spacing: 0.05em; padding: 0 8px 8px; text-align: center; border-bottom: 1px solid var(--rule);
+  }
+  .mvb-table th:first-child { text-align: left; padding-left: 0; }
+  .mvb-table td { padding: 8px; border-bottom: 1px solid var(--rule); font-size: 11px; text-align: center; vertical-align: middle; }
+  .mvb-table td:first-child { text-align: left; padding-left: 0; font-weight: 500; }
+  .mvb-table tr:last-child td { border-bottom: none; }
+  .pct-cell { font-family: var(--mono); font-size: 11px; }
+  .bar-cell { display: flex; align-items: center; gap: 6px; justify-content: center; }
+  .mini-bar { height: 8px; border-radius: 2px; background: var(--rule); width: 60px; overflow: hidden; display: inline-flex; }
+  .mini-fill-make { background: var(--fe); height: 100%; }
+  .mini-fill-buy  { background: var(--be); height: 100%; }
+
+  /* ── SUPPLIER COLOUR CHIPS ───────────────────────── */
+  .supplier-chip {
+    display: inline-flex; align-items: center; gap: 5px;
+    font-size: 11px; font-weight: 500;
+  }
+  .chip-dot { width: 8px; height: 8px; border-radius: 2px; flex-shrink: 0; }
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+  <div class="nav-logo">ABC <span>Semi</span> · Procurement Intelligence</div>
+  <div class="nav-tabs">
+    <a class="nav-tab active" href="#">Spend Distribution</a>
+    <a class="nav-tab" href="#">Financial Analytics</a>
+    <a class="nav-tab" href="#">Negotiation Leverage</a>
+    <a class="nav-tab" href="#">Fab Footprint</a>
+    <a class="nav-tab" href="#">China Competition</a>
+  </div>
+  <div class="nav-right">FY2025 · Illustrative Data</div>
+</nav>
+
+<!-- PAGE HEADER -->
+<div class="page-header">
+  <div>
+    <div class="page-title">Power Management — Spend Distribution</div>
+    <div class="page-sub">PMIC · LDO · Gate Drivers &nbsp;|&nbsp; Suppliers: TI, NXP, Infineon, STMicro, ADI</div>
+  </div>
+  <div class="pill">⚠ Illustrative spend data</div>
+</div>
+
+<div class="main">
+
+  <!-- KPI ROW -->
+  <div class="kpi-row">
+    <div class="kpi">
+      <div class="kpi-label">Total Power Mgmt Spend</div>
+      <div class="kpi-value">$28.1M</div>
+      <div class="kpi-sub">18% of total category spend</div>
+      <div class="kpi-bar"><div class="kpi-bar-fill" style="width:17%;background:var(--accent)"></div></div>
+    </div>
+    <div class="kpi">
+      <div class="kpi-label">Active Suppliers</div>
+      <div class="kpi-value">5</div>
+      <div class="kpi-sub">TI · NXP · Infineon · STMicro · ADI</div>
+      <div class="kpi-bar"><div class="kpi-bar-fill" style="width:40%;background:var(--nxp)"></div></div>
+    </div>
+    <div class="kpi">
+      <div class="kpi-label">Top Supplier Share</div>
+      <div class="kpi-value">35%</div>
+      <div class="kpi-sub">IFX · $9.7M across all sub-cats</div>
+      <div class="kpi-bar"><div class="kpi-bar-fill" style="width:35%;background:#404040"></div></div>
+    </div>
+    <div class="kpi">
+      <div class="kpi-label">Concentration Risk</div>
+      <div class="kpi-value" style="color:var(--risk-md)">Medium</div>
+      <div class="kpi-sub">HHI 3,867 · Gate Drivers high-risk</div>
+      <div class="kpi-bar"><div class="kpi-bar-fill" style="width:55%;background:var(--risk-md)"></div></div>
+    </div>
+  </div>
+
+  <!-- ROW: STACKED BAR + CONCENTRATION -->
+  <div class="row-3">
+
+    <!-- STACKED COLUMN CHART -->
+    <div class="card">
+      <div class="card-head">
+        <div class="card-title">Power Management Spend by Sub-Category &amp; Supplier</div>
+        <div class="legend">
+          <div class="legend-item"><div class="legend-dot" style="background:#00D4C8"></div>Texas Instruments</div>
+          <div class="legend-item"><div class="legend-dot" style="background:#DAA520"></div>NXP</div>
+          <div class="legend-item"><div class="legend-dot" style="background:#404040"></div>Infineon</div>
+          <div class="legend-item"><div class="legend-dot" style="background:#E87878"></div>STMicro</div>
+          <div class="legend-item"><div class="legend-dot" style="background:#6a1b9a"></div>ADI</div>
+        </div>
+      </div>
+      <div class="card-body">
+        <div class="chart-wrap">
+          <canvas id="spendChart"></canvas>
+        </div>
+      </div>
+    </div>
+
+    <!-- CONCENTRATION TABLE -->
+    <div class="card">
+      <div class="card-head">
+        <div class="card-title">Supplier Concentration</div>
+      </div>
+      <div class="card-body">
+        <table class="conc-table">
+          <thead>
+            <tr>
+              <th>Supplier</th>
+              <th class="num">Spend</th>
+              <th class="num">Share</th>
+              <th>Risk</th>
+            </tr>
+          </thead>
+          <tbody id="concTable"></tbody>
+        </table>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- ROW: RISK INSIGHTS + SUB-CAT DONUT -->
+  <div class="row-2">
+
+    <!-- RISK INSIGHTS -->
+    <div class="card">
+      <div class="card-head">
+        <div class="card-title">Concentration Risk Analysis</div>
+      </div>
+      <div class="card-body">
+        <div class="insight-list">
+          <div class="insight insight-hi">
+            <strong>Gate Drivers — HIGH concentration risk</strong>
+            Infineon holds 56% share ($6.2M) following addition of ADI ($0.9M, 8%). While ADI's entry modestly reduces IFX concentration from 61%, IFX remains the dominant supplier. Further qualification of TI or STMicro recommended to reduce concentration below 50%.
+          </div>
+          <div class="insight insight-md">
+            <strong>PMIC — MEDIUM concentration risk</strong>
+            NXP leads at 49% ($5.3M). Spend is spread across 4 suppliers but NXP share is approaching threshold. NXP recovery trajectory improving — leverage window closing. Renegotiate volume agreements in H1 2026.
+          </div>
+          <div class="insight insight-lo">
+            <strong>LDO — LOW concentration risk</strong>
+            TI leads at 53% ($3.2M) but LDO is commodity-adjacent with strong multi-source availability from all four suppliers. HHI of 1,940 is below risk threshold. Maintain current distribution.
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- SUB-CATEGORY DONUT -->
+    <div class="card">
+      <div class="card-head">
+        <div class="card-title">Spend by Sub-Category</div>
+      </div>
+      <div class="card-body" style="display:flex;flex-direction:column;align-items:center;">
+        <div class="chart-wrap" style="height:200px;width:200px;">
+          <canvas id="donutChart"></canvas>
+        </div>
+        <div style="margin-top:14px;display:flex;flex-direction:column;gap:6px;width:100%">
+          <div style="display:flex;justify-content:space-between;font-size:11px;align-items:center;">
+            <span style="display:flex;align-items:center;gap:6px;"><span style="width:10px;height:10px;border-radius:2px;background:#1a3a5c;display:inline-block"></span>PMIC</span>
+            <span style="font-family:var(--mono)">$11.0M · 39%</span>
+          </div>
+          <div style="display:flex;justify-content:space-between;font-size:11px;align-items:center;">
+            <span style="display:flex;align-items:center;gap:6px;"><span style="width:10px;height:10px;border-radius:2px;background:#e8a020;display:inline-block"></span>Gate Drivers</span>
+            <span style="font-family:var(--mono)">$11.05M · 39%</span>
+          </div>
+          <div style="display:flex;justify-content:space-between;font-size:11px;align-items:center;">
+            <span style="display:flex;align-items:center;gap:6px;"><span style="width:10px;height:10px;border-radius:2px;background:#2e7d32;display:inline-block"></span>LDO</span>
+            <span style="font-family:var(--mono)">$6.0M · 21%</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- ROW: MAP + MAKE VS BUY -->
+  <div class="row-3" style="grid-template-columns:1.4fr 1fr;">
+
+    <!-- MAP -->
+    <div class="card">
+      <div class="card-head">
+        <div class="card-title">Know Your Supplier — Global Fab &amp; Backend Locations</div>
+        <div class="map-controls" id="mapControls">
+          <button class="map-btn active" data-filter="all" onclick="filterMap(this,'all')">All Suppliers</button>
+          <button class="map-btn" data-filter="Texas Instruments" onclick="filterMap(this,'Texas Instruments')">TI</button>
+          <button class="map-btn" data-filter="NXP" onclick="filterMap(this,'NXP')">NXP</button>
+          <button class="map-btn" data-filter="Infineon" onclick="filterMap(this,'Infineon')">Infineon</button>
+          <button class="map-btn" data-filter="STMicro" onclick="filterMap(this,'STMicro')">STMicro</button>
+          <button class="map-btn" data-filter="ADI" onclick="filterMap(this,'ADI')">ADI</button>
+        </div>
+      </div>
+      <div class="card-body" style="padding:12px 16px;">
+        <div class="map-container" style="position:relative;">
+          <div class="map-tooltip" id="mapTooltip"></div>
+          <svg id="worldMap" style="width:100%;height:auto;display:block;"></svg>
+        </div>
+        <div class="map-legend">
+          <div class="map-legend-item">
+            <svg width="14" height="14" viewBox="0 0 14 14"><circle cx="7" cy="7" r="5" fill="#404040" opacity="0.9" stroke="#fff" stroke-width="0.8"/></svg>
+            Frontend (circle)
+          </div>
+          <div class="map-legend-item">
+            <svg width="14" height="14" viewBox="0 0 14 14"><polygon points="7,1 8.8,5.5 13.5,5.5 9.8,8.5 11.2,13 7,10.2 2.8,13 4.2,8.5 0.5,5.5 5.2,5.5" fill="#404040" opacity="0.85" stroke="#fff" stroke-width="0.6"/></svg>
+            Backend (star)
+          </div>
+          <div style="font-size:10px;color:var(--ink-3);margin-left:auto">Shapes coloured by supplier · Hover for location detail</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- MAKE vs BUY TABLE -->
+    <div class="card">
+      <div class="card-head">
+        <div class="card-title">Manufacturing Model — Make vs Buy</div>
+      </div>
+      <div class="card-body" style="padding:12px 16px;">
+        <table class="mvb-table">
+          <thead>
+            <tr>
+              <th>Supplier</th>
+              <th>Model</th>
+              <th>Frontend (Wafer Fab)</th>
+              <th>Backend (Assembly/Test)</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><div class="supplier-chip"><div class="chip-dot" style="background:#00D4C8"></div>TI</div></td>
+              <td><span class="risk risk-lo">IDM</span></td>
+              <td style="font-size:10.5px;color:var(--ink-2)">All internal. 300mm primary (Richardson, Sherman, Lehi). Closing last 2 × 150mm fabs. 40% lower cost vs 200mm.</td>
+              <td style="font-size:10.5px;color:var(--ink-2)">Mix of internal (Philippines, Malaysia) and external subcontractors. Majority internal per 10-K.</td>
+            </tr>
+            <tr>
+              <td><div class="supplier-chip"><div class="chip-dot" style="background:#DAA520"></div>NXP</div></td>
+              <td><span class="risk risk-md">Hybrid IDM</span></td>
+              <td style="font-size:10.5px;color:var(--ink-2)">Own 8" fabs: Nijmegen, Chandler, Austin. SSMC JV (61.2% NXP, TSMC partner) in Singapore. No owned 300mm — via VSMC &amp; ESMC JVs under construction.</td>
+              <td style="font-size:10.5px;color:var(--ink-2)">Mix of internal and external. Assembly sites in Taiwan, Thailand, Malaysia, China.</td>
+            </tr>
+            <tr>
+              <td><div class="supplier-chip"><div class="chip-dot" style="background:#404040"></div>IFX</div></td>
+              <td><span class="risk risk-md">IDM+</span></td>
+              <td style="font-size:10.5px;color:var(--ink-2)">Primarily internal. Kulim 300mm (Malaysia) ramping. Dresden Smart Power Fab under construction. In ESMC JV with TSMC/NXP/Bosch.</td>
+              <td style="font-size:10.5px;color:var(--ink-2)">Mix of internal (Batam, Melaka, Bangkok, Singapore, Cegled) and external. Some outsourced OSAT.</td>
+            </tr>
+            <tr>
+              <td><div class="supplier-chip"><div class="chip-dot" style="background:#E87878"></div>STM</div></td>
+              <td><span class="risk risk-lo">IDM</span></td>
+              <td style="font-size:10.5px;color:var(--ink-2)">All internal. 14 owned manufacturing sites. 200mm and 300mm (Agrate F3, Crolles F2). Crolles 300mm JV with GlobalFoundries for advanced CMOS.</td>
+              <td style="font-size:10.5px;color:var(--ink-2)">Mix of internal (Philippines, Malta, Morocco, Malaysia) and external subcontractors for standard packaging.</td>
+            </tr>
+            <tr>
+              <td><div class="supplier-chip"><div class="chip-dot" style="background:#6a1b9a"></div>ADI</div></td>
+              <td><span class="risk risk-hi">Fab-lite</span></td>
+              <td style="font-size:10.5px;color:var(--ink-2)">&gt;50% of wafers from TSMC and others. Own fabs: Wilmington MA, Beaverton OR, Limerick Ireland — proprietary bipolar/CMOS processes.</td>
+              <td style="font-size:10.5px;color:var(--ink-2)">Internal assembly at Penang, Malaysia. External OSAT for majority of volume.</td>
+            </tr>
+          </tbody>
+        </table>
+        <div style="margin-top:14px;padding-top:12px;border-top:1px solid var(--rule);">
+          <div style="font-size:10px;color:var(--ink-3);font-weight:600;text-transform:uppercase;letter-spacing:0.05em;margin-bottom:8px;">Key observations</div>
+          <div style="font-size:11px;color:var(--ink-2);line-height:1.6;">
+            <div style="margin-bottom:5px;">· <strong>TI &amp; STM</strong> are true IDMs — highest supply chain control and lowest dependency on third-party foundries.</div>
+            <div style="margin-bottom:5px;">· <strong>NXP</strong> SSMC JV with TSMC creates indirect Taiwan Strait exposure for power management products.</div>
+            <div style="margin-bottom:5px;">· <strong>IFX</strong> Kulim 300mm ramp (Malaysia) strengthens capacity but increases SE Asia geopolitical concentration.</div>
+            <div>· <strong>ADI</strong> &gt;50% TSMC reliance — highest foundry concentration risk; explicitly flagged in ADI 10-K as a material risk factor.</div>
+          </div>
+        </div>
+        <div style="margin-top:10px;padding:7px 10px;background:#f0fdf4;border-radius:5px;font-size:10px;color:#166534;border-left:2px solid #22c55e;">
+          ✅ Manufacturing model and fab locations confirmed from company 10-K / 20-F filings. Specific internal vs outsourced percentages are not publicly disclosed and are not shown.
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+</div><!-- /main -->
+
+<script>
+// ── DATA ────────────────────────────────────────────────
+const suppliers = ['Texas Instruments','NXP Semiconductors','Infineon','ST Microelectronics','Analog Devices'];
+const colors = { 'Texas Instruments':'#00D4C8','NXP Semiconductors':'#DAA520','Infineon':'#404040','ST Microelectronics':'#E87878','Analog Devices':'#6a1b9a' };
+const spendData = {
+  PMIC:         { 'Texas Instruments':1200000,'NXP Semiconductors':5300000,'Infineon':3000000,'ST Microelectronics':1500000,'Analog Devices':0 },
+  LDO:          { 'Texas Instruments':3200000,'NXP Semiconductors':2000000,'Infineon':500000, 'ST Microelectronics':300000, 'Analog Devices':0 },
+  'Gate Drivers':{ 'Texas Instruments':2500000,'NXP Semiconductors':150000, 'Infineon':6200000,'ST Microelectronics':1300000,'Analog Devices':900000 }
+};
+
+const subCats = Object.keys(spendData);
+const totalBySupplier = {};
+suppliers.forEach(s => {
+  totalBySupplier[s] = subCats.reduce((a,c) => a + (spendData[c][s]||0), 0);
+});
+const grandTotal = Object.values(totalBySupplier).reduce((a,b)=>a+b,0);
+
+// ── STACKED BAR ─────────────────────────────────────────
+const ctx1 = document.getElementById('spendChart').getContext('2d');
+new Chart(ctx1, {
+  type: 'bar',
+  data: {
+    labels: subCats,
+    datasets: suppliers.map(s => ({
+      label: s,
+      data: subCats.map(c => spendData[c][s] || 0),
+      backgroundColor: colors[s],
+      borderRadius: 0,
+      borderSkipped: false,
+    }))
+  },
+  options: {
+    responsive: true, maintainAspectRatio: false,
+    plugins: {
+      legend: { display: false },
+      tooltip: {
+        callbacks: {
+          label: ctx => ` ${ctx.dataset.label}: $${(ctx.raw/1e6).toFixed(1)}M`
+        }
+      }
+    },
+    scales: {
+      x: {
+        stacked: true,
+        grid: { display: false },
+        ticks: { font: { family: "'DM Sans'", size: 11 }, color: '#5c6078' }
+      },
+      y: {
+        stacked: true,
+        grid: { color: '#e2e4ea', drawBorder: false },
+        ticks: {
+          font: { family: "'DM Mono'", size: 10 }, color: '#5c6078',
+          callback: v => '$' + (v/1e6).toFixed(0) + 'M'
+        }
+      }
+    }
+  }
+});
+
+// ── DONUT ───────────────────────────────────────────────
+const subTotals = subCats.map(c => Object.values(spendData[c]).reduce((a,b)=>a+b,0));
+const ctx2 = document.getElementById('donutChart').getContext('2d');
+new Chart(ctx2, {
+  type: 'doughnut',
+  data: {
+    labels: subCats,
+    datasets: [{ data: subTotals, backgroundColor: ['#1a3a5c','#e8a020','#2e7d32'], borderWidth: 2, borderColor: '#fff' }]
+  },
+  options: {
+    responsive: true, maintainAspectRatio: false, cutout: '62%',
+    plugins: { legend: { display: false }, tooltip: { callbacks: {
+      label: ctx => ` ${ctx.label}: $${(ctx.raw/1e6).toFixed(1)}M`
+    }}}
+  }
+});
+
+// ── CONCENTRATION TABLE ─────────────────────────────────
+const concTbody = document.getElementById('concTable');
+const sorted = suppliers.slice().sort((a,b) => totalBySupplier[b]-totalBySupplier[a]);
+const risks = { 'NXP Semiconductors':'lo','Infineon':'hi','Texas Instruments':'lo','ST Microelectronics':'lo','Analog Devices':'lo' };
+sorted.forEach(s => {
+  const pct = (totalBySupplier[s]/grandTotal*100).toFixed(1);
+  const r = risks[s];
+  const rLabel = {hi:'HIGH',md:'MEDIUM',lo:'LOW'}[r];
+  const abbr = {'Texas Instruments':'TI','NXP Semiconductors':'NXP','Infineon':'IFX','ST Microelectronics':'STM'}[s];
+  const tr = document.createElement('tr');
+  tr.innerHTML = `
+    <td><div class="supplier-chip"><div class="chip-dot" style="background:${colors[s]}"></div>${abbr}</div></td>
+    <td class="num">$${(totalBySupplier[s]/1e6).toFixed(1)}M</td>
+    <td class="num">
+      <div style="display:flex;align-items:center;gap:6px;justify-content:flex-end;">
+        <div class="share-bar"><div class="share-fill" style="width:${pct}%;background:${colors[s]}"></div></div>
+        ${pct}%
+      </div>
+    </td>
+    <td><span class="risk risk-${r}"><span class="risk-dot"></span>${rLabel}</span></td>`;
+  concTbody.appendChild(tr);
+});
+
+// Fab locations with real lat/lon
+const supplierColors = {
+  'Texas Instruments':'#00D4C8','Infineon':'#404040',
+  'NXP':'#DAA520','STMicro':'#E87878','ADI':'#6a1b9a'
+};
+
+const fabData = [
+  // TI Frontend
+  {co:'Texas Instruments',type:'Frontend',city:'Dallas/Richardson, TX',lat:32.90,lon:-96.75},
+  {co:'Texas Instruments',type:'Frontend',city:'Sherman, TX',lat:33.63,lon:-96.61},
+  {co:'Texas Instruments',type:'Frontend',city:'Lehi, UT',lat:40.39,lon:-111.85},
+  {co:'Texas Instruments',type:'Frontend',city:'Freising, Germany',lat:48.40,lon:11.75},
+  {co:'Texas Instruments',type:'Frontend',city:'Aizu, Japan',lat:37.49,lon:139.93},
+  {co:'Texas Instruments',type:'Frontend',city:'Miho, Japan',lat:36.19,lon:140.31},
+  // TI Backend
+  {co:'Texas Instruments',type:'Backend',city:'Kuala Lumpur, Malaysia',lat:3.14,lon:101.69},
+  {co:'Texas Instruments',type:'Backend',city:'Baguio, Philippines',lat:16.41,lon:120.60},
+  {co:'Texas Instruments',type:'Backend',city:'Pampanga, Philippines',lat:15.07,lon:120.62},
+  // IFX Frontend
+  {co:'Infineon',type:'Frontend',city:'Dresden, Germany',lat:51.05,lon:13.74},
+  {co:'Infineon',type:'Frontend',city:'Regensburg, Germany',lat:49.00,lon:12.10},
+  {co:'Infineon',type:'Frontend',city:'Kulim, Malaysia',lat:5.40,lon:100.56},
+  {co:'Infineon',type:'Frontend',city:'Leominster, MA',lat:42.52,lon:-71.76},
+  // IFX Backend
+  {co:'Infineon',type:'Backend',city:'Batam, Indonesia',lat:1.13,lon:104.05},
+  {co:'Infineon',type:'Backend',city:'Melaka, Malaysia',lat:2.19,lon:102.24},
+  {co:'Infineon',type:'Backend',city:'Bangkok, Thailand',lat:13.75,lon:100.52},
+  {co:'Infineon',type:'Backend',city:'Singapore',lat:1.35,lon:103.82},
+  {co:'Infineon',type:'Backend',city:'Cegled, Hungary',lat:47.17,lon:19.80},
+  // NXP Frontend
+  {co:'NXP',type:'Frontend',city:'Chandler, AZ',lat:33.30,lon:-111.84},
+  {co:'NXP',type:'Frontend',city:'Austin, TX',lat:30.27,lon:-97.74},
+  {co:'NXP',type:'Frontend',city:'Nijmegen, Netherlands',lat:51.84,lon:5.85},
+  {co:'NXP',type:'Frontend',city:'Singapore (SSMC)',lat:1.29,lon:103.85},
+  // NXP Backend
+  {co:'NXP',type:'Backend',city:'Bangkok, Thailand',lat:13.80,lon:100.55},
+  {co:'NXP',type:'Backend',city:'Kuala Lumpur, Malaysia',lat:3.18,lon:101.72},
+  {co:'NXP',type:'Backend',city:'Tianjin, China',lat:39.13,lon:117.20},
+  {co:'NXP',type:'Backend',city:'Kaohsiung, Taiwan',lat:22.62,lon:120.30},
+  // STM Frontend
+  {co:'STMicro',type:'Frontend',city:'Agrate, Italy',lat:45.58,lon:9.35},
+  {co:'STMicro',type:'Frontend',city:'Catania, Italy',lat:37.50,lon:15.09},
+  {co:'STMicro',type:'Frontend',city:'Crolles, France',lat:45.27,lon:5.88},
+  {co:'STMicro',type:'Frontend',city:'Rousset, France',lat:43.52,lon:5.46},
+  {co:'STMicro',type:'Frontend',city:'Tours, France',lat:47.39,lon:0.69},
+  // STM Backend
+  {co:'STMicro',type:'Backend',city:'Calamba, Philippines',lat:14.21,lon:121.17},
+  {co:'STMicro',type:'Backend',city:'Shenzhen, China',lat:22.54,lon:114.06},
+  {co:'STMicro',type:'Backend',city:'Bouskoura, Morocco',lat:33.36,lon:-7.67},
+  // ADI Frontend
+  {co:'ADI',type:'Frontend',city:'Wilmington, MA',lat:42.56,lon:-71.17},
+  {co:'ADI',type:'Frontend',city:'Beaverton, OR',lat:45.49,lon:-122.80},
+  {co:'ADI',type:'Frontend',city:'Limerick, Ireland',lat:52.66,lon:-8.63},
+  // ADI Backend
+  {co:'ADI',type:'Backend',city:'Penang, Malaysia',lat:5.41,lon:100.33},
+];
+
+// Star polygon helper
+function starPath(cx, cy, r) {
+  const inner = r * 0.42;
+  const pts = [];
+  for (let i = 0; i < 10; i++) {
+    const angle = (Math.PI / 5) * i - Math.PI / 2;
+    const rad = i % 2 === 0 ? r : inner;
+    pts.push(`${cx + rad * Math.cos(angle)},${cy + rad * Math.sin(angle)}`);
+  }
+  return pts.join(' ');
+}
+
+// D3 world map
+const W = 900, H = 460;
+const projection = d3.geoNaturalEarth1()
+  .scale(145)
+  .translate([W / 2, H / 2]);
+const path = d3.geoPath().projection(projection);
+
+const svg = d3.select('#worldMap')
+  .attr('viewBox', `0 0 ${W} ${H}`)
+  .attr('xmlns', 'http://www.w3.org/2000/svg');
+
+// Background ocean
+svg.append('rect').attr('width', W).attr('height', H)
+  .attr('fill', '#dce8f0').attr('rx', 6);
+
+// Load and render world
+fetch('https://cdn.jsdelivr.net/npm/world-atlas@2/countries-110m.json')
+  .then(r => r.json())
+  .then(world => {
+    svg.append('g').selectAll('path')
+      .data(topojson.feature(world, world.objects.countries).features)
+      .join('path')
+      .attr('d', path)
+      .attr('fill', '#e8eaef')
+      .attr('stroke', '#fff')
+      .attr('stroke-width', 0.4);
+
+    // Graticule
+    svg.append('path')
+      .datum(d3.geoGraticule()())
+      .attr('d', path)
+      .attr('fill', 'none')
+      .attr('stroke', '#c8d8e4')
+      .attr('stroke-width', 0.3);
+
+    renderDots('all');
+  });
+
+const supplierSpend = {
+  'Texas Instruments': 6900000,
+  'Infineon': 9700000,
+  'NXP': 7450000,
+  'STMicro': 3100000,
+  'ADI': 900000,
+};
+const maxSpend = Math.max(...Object.values(supplierSpend));
+
+let dotsGroup = null;
+
+function renderDots(filter) {
+  if (dotsGroup) dotsGroup.remove();
+  dotsGroup = svg.append('g').attr('class','dots-layer');
+
+  const filtered = filter === 'all' ? fabData : fabData.filter(d => d.co === filter);
+  const tooltip = document.getElementById('mapTooltip');
+
+  filtered.forEach(d => {
+    const col = supplierColors[d.co] || '#888';
+    const spend = supplierSpend[d.co] || 1;
+    const r = 4 + (spend / maxSpend) * 4;
+    const proj = projection([d.lon, d.lat]);
+    if (!proj) return;
+    const [px, py] = proj;
+
+    let el;
+    if (d.type === 'Backend') {
+      el = dotsGroup.append('polygon')
+        .attr('points', starPath(px, py, r))
+        .attr('fill', col).attr('opacity', 0.88)
+        .attr('stroke', '#fff').attr('stroke-width', 0.7);
+    } else {
+      el = dotsGroup.append('circle')
+        .attr('cx', px).attr('cy', py).attr('r', r)
+        .attr('fill', col).attr('opacity', 0.92)
+        .attr('stroke', '#fff').attr('stroke-width', 0.8);
+    }
+
+    el.style('cursor','pointer')
+      .on('mousemove', (event) => {
+        const rect = document.querySelector('.map-container').getBoundingClientRect();
+        tooltip.style.left = (event.clientX - rect.left + 12) + 'px';
+        tooltip.style.top  = (event.clientY - rect.top  - 32) + 'px';
+        tooltip.textContent = `${d.co} · ${d.type} · ${d.city}`;
+        tooltip.style.opacity = '1';
+      })
+      .on('mouseleave', () => { tooltip.style.opacity = '0'; });
+  });
+}
+
+function filterMap(btn, filter) {
+  document.querySelectorAll('.map-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  renderDots(filter);
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,549 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ABC Semiconductor — Fab Footprint & Technology</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --ink:#0f1117; --ink-2:#2d3142; --ink-3:#5c6078; --ink-4:#8b90a7;
+    --rule:#e2e4ea; --surface:#f7f8fc; --white:#ffffff;
+    --ti:#00D4C8; --nxp:#DAA520; --ifx:#404040; --stm:#E87878; --adi:#6a1b9a;
+    --confirmed:#22c55e; --analysis:#6b8cda; --assumption:#aaa;
+    --font:'DM Sans',sans-serif; --mono:'DM Mono',monospace;
+  }
+  *{box-sizing:border-box;margin:0;padding:0;}
+  body{font-family:var(--font);background:var(--white);color:var(--ink);font-size:13px;line-height:1.5;}
+
+  nav{background:var(--ink);padding:0 28px;display:flex;align-items:center;height:48px;position:sticky;top:0;z-index:100;}
+  .nav-logo{color:#fff;font-size:13px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;margin-right:36px;white-space:nowrap;}
+  .nav-logo span{color:#DAA520;}
+  .nav-tabs{display:flex;height:100%;}
+  .nav-tab{color:rgba(255,255,255,.5);font-size:12px;font-weight:500;padding:0 18px;display:flex;align-items:center;cursor:pointer;border-bottom:2px solid transparent;text-decoration:none;white-space:nowrap;transition:all .15s;}
+  .nav-tab:hover{color:rgba(255,255,255,.85);}
+  .nav-tab.active{color:#fff;border-bottom-color:#DAA520;}
+  .nav-right{margin-left:auto;color:rgba(255,255,255,.4);font-size:11px;font-family:var(--mono);}
+
+  .page-header{background:var(--white);border-bottom:1px solid var(--rule);padding:18px 28px 14px;}
+  .page-title{font-size:18px;font-weight:600;}
+  .page-sub{font-size:12px;color:var(--ink-3);margin-top:3px;}
+
+  .main{padding:20px 28px;}
+
+  /* Source legend */
+  .source-legend{display:flex;gap:16px;flex-wrap:wrap;padding:9px 14px;background:var(--surface);border:1px solid var(--rule);border-radius:6px;margin-bottom:20px;align-items:center;}
+  .sl-item{display:flex;align-items:center;gap:6px;font-size:11px;color:var(--ink-2);}
+  .sl-dot{width:7px;height:7px;border-radius:50%;flex-shrink:0;}
+  .sl-note{margin-left:auto;font-size:10px;color:var(--ink-4);font-family:var(--mono);}
+
+  /* Section head */
+  .sec-head{margin:24px 0 14px;display:flex;align-items:center;gap:12px;}
+  .sec-title{font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.07em;color:var(--ink-3);white-space:nowrap;}
+  .sec-rule{flex:1;height:1px;background:var(--rule);}
+  .sec-note{font-size:10px;color:var(--ink-4);font-family:var(--mono);white-space:nowrap;}
+
+  /* Tags — monochrome */
+  .tag{display:inline-flex;align-items:center;font-size:10px;font-weight:500;padding:1px 7px;border-radius:3px;font-family:var(--mono);white-space:nowrap;background:var(--surface);color:var(--ink-2);border:1px solid var(--rule);}
+  .tag-idm{background:var(--ink);color:#fff;border-color:var(--ink);}
+  .tag-closing{color:var(--ink-3);text-decoration:line-through;border-style:dashed;}
+  .tag-na{background:transparent;color:var(--ink-4);border:1px dashed #d0d4e0;}
+
+  /* ── SUPPLIER CARDS ──────────────────────────────── */
+  .supplier-cards{display:grid;grid-template-columns:repeat(5,1fr);gap:10px;margin-bottom:24px;}
+  .sup-card{border:1px solid var(--rule);border-radius:8px;overflow:hidden;background:var(--white);}
+  .sup-card-bar{height:3px;}
+  .sup-card-head{padding:11px 12px 8px;border-bottom:1px solid var(--rule);}
+  .sup-card-name{font-size:12px;font-weight:600;color:var(--ink);}
+  .sup-card-model{font-size:10px;font-family:var(--mono);color:var(--ink-3);margin-top:1px;}
+  .sup-card-body{padding:10px 12px;}
+  .sup-kv{margin-bottom:6px;}
+  .sup-kv-label{font-size:9px;font-weight:600;text-transform:uppercase;letter-spacing:.06em;color:var(--ink-4);margin-bottom:1px;}
+  .sup-kv-val{font-size:11px;color:var(--ink-2);line-height:1.4;}
+  .sup-direction{margin-top:9px;padding:6px 8px;background:var(--surface);border-radius:4px;font-size:10px;color:var(--ink-2);line-height:1.5;border-left:2px solid var(--rule);}
+  .sup-direction strong{display:block;font-size:9px;font-weight:600;text-transform:uppercase;letter-spacing:.06em;color:var(--ink-4);margin-bottom:2px;}
+  .sup-src{font-size:9px;color:var(--ink-4);font-family:var(--mono);margin-top:6px;display:flex;align-items:center;gap:4px;}
+  .src-dot{width:5px;height:5px;border-radius:50%;flex-shrink:0;}
+
+  /* ── MIGRATION CARDS ─────────────────────────────── */
+  .mig-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:10px;margin-bottom:24px;}
+  .mig-card{background:var(--white);border:1px solid var(--rule);border-radius:8px;overflow:hidden;}
+  .mig-head{padding:9px 12px 7px;border-bottom:1px solid var(--rule);display:flex;align-items:center;gap:7px;}
+  .mig-dot{width:8px;height:8px;border-radius:2px;flex-shrink:0;}
+  .mig-name{font-size:11px;font-weight:600;color:var(--ink);}
+  .mig-body{padding:10px 12px;}
+  .mig-row{display:flex;align-items:flex-start;gap:7px;margin-bottom:6px;}
+  .mig-label{font-size:9px;color:var(--ink-4);width:52px;flex-shrink:0;font-family:var(--mono);padding-top:2px;}
+  .mig-note{font-size:10px;color:var(--ink-3);line-height:1.5;margin-top:7px;padding-top:7px;border-top:1px solid var(--rule);}
+  .mig-src{font-size:9px;color:var(--ink-4);font-family:var(--mono);margin-top:4px;display:flex;align-items:center;gap:3px;}
+
+  /* ── PROCESS CARDS ───────────────────────────────── */
+  .prod-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:24px;}
+  .prod-card{background:var(--white);border:1px solid var(--rule);border-radius:8px;overflow:hidden;}
+  .prod-head{padding:9px 13px 7px;border-bottom:1px solid var(--rule);}
+  .prod-title{font-size:12px;font-weight:600;text-transform:uppercase;letter-spacing:.05em;color:var(--ink);}
+  .prod-sub{font-size:10px;color:var(--ink-3);margin-top:1px;}
+  .prod-body{padding:10px 13px;}
+  .prod-row{display:flex;align-items:flex-start;gap:9px;padding:6px 0;border-bottom:1px solid var(--rule);}
+  .prod-row:last-child{border-bottom:none;}
+  .prod-sup{font-size:11px;font-weight:600;width:32px;flex-shrink:0;padding-top:2px;}
+  .prod-chips{display:flex;flex-wrap:wrap;gap:3px;margin-bottom:3px;}
+  .chip-note{font-size:10px;color:var(--ink-3);padding-left:1px;display:flex;align-items:center;gap:4px;}
+  .chip-note::before{content:'';width:2px;height:2px;border-radius:50%;background:var(--ink-4);flex-shrink:0;}
+  /* Evidence inline */
+  .ev{font-size:9px;padding:1px 5px;border-radius:0 2px 2px 0;font-family:var(--mono);}
+  .ev-c{color:var(--ink-3);border-left:2px solid var(--confirmed);}
+  .ev-a{color:var(--ink-3);border-left:2px solid var(--analysis);}
+  .ev-w{color:var(--ink-4);border-left:2px solid var(--assumption);}
+
+  /* ── JV TABLE ────────────────────────────────────── */
+  .jv-table{width:100%;border-collapse:collapse;margin-bottom:24px;}
+  .jv-table th{font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.05em;padding:7px 10px;border-bottom:2px solid var(--rule);text-align:left;background:var(--surface);color:var(--ink-3);}
+  .jv-table td{padding:9px 10px;border-bottom:1px solid var(--rule);font-size:11px;vertical-align:top;}
+  .jv-table tr:last-child td{border-bottom:none;}
+  .jv-status{display:inline-flex;align-items:center;gap:5px;font-size:10px;font-weight:500;font-family:var(--mono);color:var(--ink-2);}
+  .jv-status::before{content:'';width:6px;height:6px;border-radius:50%;flex-shrink:0;}
+  .jv-active::before{background:#22c55e;}
+  .jv-build::before{background:#f59e0b;}
+  .jv-new::before{background:#6b8cda;}
+
+  /* ── OBSERVATIONS ────────────────────────────────── */
+  .obs-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:24px;}
+  .obs-card{padding:12px 14px;border-radius:6px;border:1px solid var(--rule);background:var(--white);border-left:3px solid;}
+  .obs-title{font-size:11px;font-weight:600;margin-bottom:5px;}
+  .obs-text{font-size:11px;color:var(--ink-2);line-height:1.6;}
+
+  .footer-note{font-size:10px;color:var(--ink-4);line-height:1.6;padding-top:14px;border-top:1px solid var(--rule);}
+</style>
+</head>
+<body>
+
+<nav>
+  <div class="nav-logo">ABC <span>Semi</span> · Procurement Intelligence</div>
+  <div class="nav-tabs">
+    <a class="nav-tab" href="#">Spend Distribution</a>
+    <a class="nav-tab" href="#">Financial Analytics</a>
+    <a class="nav-tab" href="#">Negotiation Leverage</a>
+    <a class="nav-tab active" href="#">Fab Footprint</a>
+    <a class="nav-tab" href="#">China Competition</a>
+  </div>
+  <div class="nav-right">Source: 10-K / 20-F FY2025</div>
+</nav>
+
+<div class="page-header">
+  <div class="page-title">Fab Footprint &amp; Process Technology</div>
+  <div class="page-sub">Manufacturing model · Wafer size roadmap · Process technology · JV dependencies · PMIC / LDO / Gate Drivers</div>
+</div>
+
+<div class="main">
+
+  <div class="source-legend">
+    <div class="sl-item"><div class="sl-dot" style="background:var(--confirmed)"></div>Confirmed — 10-K / 20-F filing</div>
+    <div class="sl-item"><div class="sl-dot" style="background:var(--analysis)"></div>Analysis — derived from confirmed data</div>
+    <div class="sl-item"><div class="sl-dot" style="background:var(--assumption)"></div>Working assumption</div>
+    <div class="sl-note">Product-level process nodes not disclosed in public filings</div>
+  </div>
+
+  <!-- ── 1. SUPPLIER AT A GLANCE ─────────────────────────────────── -->
+  <div class="sec-head">
+    <div class="sec-title">Supplier at a Glance</div>
+    <div class="sec-rule"></div>
+    <div class="sec-note">Key manufacturing facts — all confirmed from annual filings</div>
+  </div>
+
+  <div class="supplier-cards">
+
+    <div class="sup-card">
+      <div class="sup-card-bar" style="background:var(--ti)"></div>
+      <div class="sup-card-head">
+        <div class="sup-card-name">Texas Instruments</div>
+        <div class="sup-card-model">IDM · Fully owned fabs</div>
+      </div>
+      <div class="sup-card-body">
+        <div class="sup-kv"><div class="sup-kv-label">Primary wafer</div><div class="sup-kv-val">300mm — ramping</div></div>
+        <div class="sup-kv"><div class="sup-kv-label">Transitioning</div><div class="sup-kv-val">Closing last 2 × 150mm fabs</div></div>
+        <div class="sup-kv"><div class="sup-kv-label">Process</div><div class="sup-kv-val">Analog CMOS (proprietary)</div></div>
+        <div class="sup-direction"><strong>Key direction</strong>300mm costs ~40% less than 200mm — management confirmed. Richardson, Sherman &amp; Lehi fabs ramping in FY2025.</div>
+        <div class="sup-src"><div class="src-dot" style="background:var(--confirmed)"></div>TI 10-K FY2025</div>
+      </div>
+    </div>
+
+    <div class="sup-card">
+      <div class="sup-card-bar" style="background:var(--nxp)"></div>
+      <div class="sup-card-head">
+        <div class="sup-card-name">NXP Semiconductors</div>
+        <div class="sup-card-model">Hybrid IDM · JV-led 300mm</div>
+      </div>
+      <div class="sup-card-body">
+        <div class="sup-kv"><div class="sup-kv-label">Current wafer</div><div class="sup-kv-val">200mm / 8" (all owned fabs)</div></div>
+        <div class="sup-kv"><div class="sup-kv-label">GaN fab only</div><div class="sup-kv-val">150mm / 6" (Chandler RF)</div></div>
+        <div class="sup-kv"><div class="sup-kv-label">Process</div><div class="sup-kv-val">BCDMOS · CMOS · BiCMOS</div></div>
+        <div class="sup-direction"><strong>Key direction</strong>No owned 300mm today. 300mm via VSMC (Singapore) and ESMC (Dresden) JVs — both under construction.</div>
+        <div class="sup-src"><div class="src-dot" style="background:var(--confirmed)"></div>NXP 20-F FY2025</div>
+      </div>
+    </div>
+
+    <div class="sup-card">
+      <div class="sup-card-bar" style="background:var(--ifx)"></div>
+      <div class="sup-card-head">
+        <div class="sup-card-name">Infineon</div>
+        <div class="sup-card-model">IDM+ · Strategic foundry JVs</div>
+      </div>
+      <div class="sup-card-body">
+        <div class="sup-kv"><div class="sup-kv-label">Si / GaN wafer</div><div class="sup-kv-val">300mm (Kulim live)</div></div>
+        <div class="sup-kv"><div class="sup-kv-label">SiC wafer</div><div class="sup-kv-val">→ 200mm (shifting now)</div></div>
+        <div class="sup-kv"><div class="sup-kv-label">Platforms</div><div class="sup-kv-val">Si · SiC · GaN</div></div>
+        <div class="sup-direction"><strong>Key direction</strong>"SiC to 200mm, GaN to 300mm." Dresden Smart Power Fab under construction. Also in ESMC JV.</div>
+        <div class="sup-src"><div class="src-dot" style="background:var(--confirmed)"></div>IFX Annual Report FY2025</div>
+      </div>
+    </div>
+
+    <div class="sup-card">
+      <div class="sup-card-bar" style="background:var(--stm)"></div>
+      <div class="sup-card-head">
+        <div class="sup-card-name">STMicroelectronics</div>
+        <div class="sup-card-model">IDM · Best disclosed of group</div>
+      </div>
+      <div class="sup-card-body">
+        <div class="sup-kv"><div class="sup-kv-label">Advanced</div><div class="sup-kv-val">300mm (Agrate F3, Crolles F2)</div></div>
+        <div class="sup-kv"><div class="sup-kv-label">Mainstream</div><div class="sup-kv-val">200mm (most fabs)</div></div>
+        <div class="sup-kv"><div class="sup-kv-label">Process</div><div class="sup-kv-val">BCD · VIPpower™ · STI2GaN</div></div>
+        <div class="sup-direction"><strong>Key direction</strong>14 owned sites disclosed. SiC expanding at Catania. GlobalFoundries JV at Crolles received EU CHIPS funding.</div>
+        <div class="sup-src"><div class="src-dot" style="background:var(--confirmed)"></div>STM 20-F FY2025 fab table</div>
+      </div>
+    </div>
+
+    <div class="sup-card">
+      <div class="sup-card-bar" style="background:var(--adi)"></div>
+      <div class="sup-card-head">
+        <div class="sup-card-name">Analog Devices</div>
+        <div class="sup-card-model">Fab-lite · &gt;50% TSMC</div>
+      </div>
+      <div class="sup-card-body">
+        <div class="sup-kv"><div class="sup-kv-label">Own fabs</div><div class="sup-kv-val">Wilmington · Beaverton · Limerick</div></div>
+        <div class="sup-kv"><div class="sup-kv-label">Primary foundry</div><div class="sup-kv-val">TSMC (wafer sizes undisclosed)</div></div>
+        <div class="sup-kv"><div class="sup-kv-label">Process</div><div class="sup-kv-val">Bipolar + CMOS (proprietary)</div></div>
+        <div class="sup-direction"><strong>Key direction</strong>Taiwan Strait risk flagged as material risk in ADI 10-K. No 300mm roadmap disclosed. Highest foundry concentration risk.</div>
+        <div class="sup-src"><div class="src-dot" style="background:var(--confirmed)"></div>ADI 10-K FY2025</div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- ── 2. WAFER MIGRATION ─────────────────────────────────────── -->
+  <div class="sec-head">
+    <div class="sec-title">Wafer Size Migration — Current to Roadmap</div>
+    <div class="sec-rule"></div>
+  </div>
+
+  <div class="mig-grid">
+
+    <div class="mig-card">
+      <div class="mig-head"><div class="mig-dot" style="background:var(--ti)"></div><div class="mig-name">Texas Instruments</div></div>
+      <div class="mig-body">
+        <div class="mig-row"><div class="mig-label">Closing</div><span class="tag tag-closing">150mm — 2 fabs</span></div>
+        <div class="mig-row"><div class="mig-label">Legacy</div><span class="tag">200mm winding down</span></div>
+        <div class="mig-row"><div class="mig-label">Primary</div><span class="tag">300mm — main platform</span></div>
+        <div class="mig-note">300mm chip ~40% cheaper than 200mm — management confirmed. Richardson, Sherman, Lehi qualifying and ramping in 2025.</div>
+        <div class="mig-src"><div class="src-dot" style="background:var(--confirmed)"></div>TI 10-K FY2025</div>
+      </div>
+    </div>
+
+    <div class="mig-card">
+      <div class="mig-head"><div class="mig-dot" style="background:var(--nxp)"></div><div class="mig-name">NXP</div></div>
+      <div class="mig-body">
+        <div class="mig-row"><div class="mig-label">GaN only</div><span class="tag">150mm / 6" Chandler RF</span></div>
+        <div class="mig-row"><div class="mig-label">All Si fabs</div><span class="tag">200mm / 8"</span></div>
+        <div class="mig-row"><div class="mig-label">Roadmap</div><span class="tag">300mm via VSMC + ESMC</span></div>
+        <div class="mig-note">No owned 300mm today. VSMC (Singapore, with Vanguard) and ESMC (Dresden, with TSMC/Bosch/IFX) both under construction.</div>
+        <div class="mig-src"><div class="src-dot" style="background:var(--confirmed)"></div>NXP 20-F FY2025</div>
+      </div>
+    </div>
+
+    <div class="mig-card">
+      <div class="mig-head"><div class="mig-dot" style="background:var(--ifx)"></div><div class="mig-name">Infineon</div></div>
+      <div class="mig-body">
+        <div class="mig-row"><div class="mig-label">SiC</div><span class="tag">→ 200mm (shifting)</span></div>
+        <div class="mig-row"><div class="mig-label">Si + GaN</div><span class="tag">300mm primary</span></div>
+        <div class="mig-row"><div class="mig-label">Roadmap</div><span class="tag">Dresden Smart Fab (300mm)</span></div>
+        <div class="mig-note">Kulim 300mm SiC started volume FY2025. Dresden Smart Power Fab under construction. In ESMC JV with TSMC/NXP/Bosch.</div>
+        <div class="mig-src"><div class="src-dot" style="background:var(--confirmed)"></div>IFX Annual Report FY2025</div>
+      </div>
+    </div>
+
+    <div class="mig-card">
+      <div class="mig-head"><div class="mig-dot" style="background:var(--stm)"></div><div class="mig-name">STMicro</div></div>
+      <div class="mig-body">
+        <div class="mig-row"><div class="mig-label">SiC legacy</div><span class="tag">150mm Catania</span></div>
+        <div class="mig-row"><div class="mig-label">Si + SiC</div><span class="tag">200mm most fabs</span></div>
+        <div class="mig-row"><div class="mig-label">Advanced</div><span class="tag">300mm Agrate F3, Crolles F2</span></div>
+        <div class="mig-note">New 200mm SiC facility at Catania announced 2024. GF JV at Crolles received EU CHIPS Act funding.</div>
+        <div class="mig-src"><div class="src-dot" style="background:var(--confirmed)"></div>STM 20-F FY2025</div>
+      </div>
+    </div>
+
+    <div class="mig-card">
+      <div class="mig-head"><div class="mig-dot" style="background:var(--adi)"></div><div class="mig-name">ADI</div></div>
+      <div class="mig-body">
+        <div class="mig-row"><div class="mig-label">Own fabs</div><span class="tag tag-na">Sizes not disclosed</span></div>
+        <div class="mig-row"><div class="mig-label">&gt;50% wafers</div><span class="tag">TSMC (leading edge)</span></div>
+        <div class="mig-row"><div class="mig-label">Roadmap</div><span class="tag tag-na">Not disclosed</span></div>
+        <div class="mig-note">Fab-lite model means wafer migration follows TSMC's roadmap. Taiwan Strait risk explicitly flagged as a material risk factor in 10-K.</div>
+        <div class="mig-src"><div class="src-dot" style="background:var(--confirmed)"></div>ADI 10-K FY2025</div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- ── 3. PROCESS BY PRODUCT ──────────────────────────────────── -->
+  <div class="sec-head">
+    <div class="sec-title">Process Technology by Product</div>
+    <div class="sec-rule"></div>
+    <div class="sec-note">Process family only — specific nodes not disclosed in public filings</div>
+  </div>
+
+  <div class="prod-grid">
+
+    <div class="prod-card">
+      <div class="prod-head"><div class="prod-title">PMIC</div><div class="prod-sub">Power Management ICs — DC/DC, multi-rail</div></div>
+      <div class="prod-body">
+        <div class="prod-row">
+          <div class="prod-sup" style="color:var(--ti)">TI</div>
+          <div>
+            <div class="prod-chips"><span class="tag">Analog CMOS</span><span class="tag">300mm</span></div>
+            <div class="chip-note">Process name not disclosed <span class="ev ev-w">◆</span></div>
+          </div>
+        </div>
+        <div class="prod-row">
+          <div class="prod-sup" style="color:var(--nxp)">NXP</div>
+          <div>
+            <div class="prod-chips"><span class="tag">BCDMOS</span><span class="tag">200mm</span></div>
+            <div class="chip-note">SSMC / Nijmegen confirmed for power <span class="ev ev-c">✅</span></div>
+          </div>
+        </div>
+        <div class="prod-row">
+          <div class="prod-sup" style="color:var(--ifx)">IFX</div>
+          <div>
+            <div class="prod-chips"><span class="tag">Si power</span><span class="tag">300mm</span></div>
+            <div class="chip-note">Si-based power MOSFET process <span class="ev ev-c">✅</span></div>
+          </div>
+        </div>
+        <div class="prod-row">
+          <div class="prod-sup" style="color:var(--stm)">STM</div>
+          <div>
+            <div class="prod-chips"><span class="tag">BCD</span><span class="tag">VIPpower™</span></div>
+            <div class="chip-note">Confirmed at Agrate, Ang Mo Kio, Catania <span class="ev ev-c">✅</span></div>
+          </div>
+        </div>
+        <div class="prod-row">
+          <div class="prod-sup" style="color:var(--adi)">ADI</div>
+          <div>
+            <div class="prod-chips"><span class="tag">Bipolar/CMOS</span><span class="tag">&gt;50% TSMC</span></div>
+            <div class="chip-note">Own fabs + TSMC foundry <span class="ev ev-c">✅</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="prod-card">
+      <div class="prod-head"><div class="prod-title">LDO Regulators</div><div class="prod-sub">Low dropout linear regulators</div></div>
+      <div class="prod-body">
+        <div class="prod-row">
+          <div class="prod-sup" style="color:var(--ti)">TI</div>
+          <div>
+            <div class="prod-chips"><span class="tag">Analog CMOS</span><span class="tag">300mm</span></div>
+            <div class="chip-note">Mature product migrating to 300mm for cost <span class="ev ev-c">✅</span></div>
+          </div>
+        </div>
+        <div class="prod-row">
+          <div class="prod-sup" style="color:var(--nxp)">NXP</div>
+          <div>
+            <div class="prod-chips"><span class="tag">BCDMOS</span><span class="tag">200mm</span></div>
+            <div class="chip-note">Nijmegen / SSMC, 140nm–1µm <span class="ev ev-c">✅</span></div>
+          </div>
+        </div>
+        <div class="prod-row">
+          <div class="prod-sup" style="color:var(--ifx)">IFX</div>
+          <div>
+            <div class="prod-chips"><span class="tag">Si-based</span><span class="tag">200–300mm</span></div>
+            <div class="chip-note">PSS segment — specific process not disclosed <span class="ev ev-a">🔢</span></div>
+          </div>
+        </div>
+        <div class="prod-row">
+          <div class="prod-sup" style="color:var(--stm)">STM</div>
+          <div>
+            <div class="prod-chips"><span class="tag">BCD</span><span class="tag">VIPpower™</span></div>
+            <div class="chip-note">Ang Mo Kio Fab2 + Rousset confirmed <span class="ev ev-c">✅</span></div>
+          </div>
+        </div>
+        <div class="prod-row">
+          <div class="prod-sup" style="color:var(--adi)">ADI</div>
+          <div>
+            <div class="prod-chips"><span class="tag">Proprietary CMOS</span></div>
+            <div class="chip-note">Own fabs (Wilmington, Limerick) <span class="ev ev-c">✅</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="prod-card">
+      <div class="prod-head"><div class="prod-title">Gate Drivers</div><div class="prod-sub">MOSFET / IGBT / SiC / GaN</div></div>
+      <div class="prod-body">
+        <div class="prod-row">
+          <div class="prod-sup" style="color:var(--ti)">TI</div>
+          <div>
+            <div class="prod-chips"><span class="tag">Analog CMOS</span><span class="tag">300mm</span></div>
+            <div class="chip-note">Process not disclosed — 300mm migrating <span class="ev ev-w">◆</span></div>
+          </div>
+        </div>
+        <div class="prod-row">
+          <div class="prod-sup" style="color:var(--nxp)">NXP</div>
+          <div>
+            <div class="prod-chips"><span class="tag">BCDMOS</span><span class="tag">200mm</span></div>
+            <div class="chip-note">MOSFET/IGBT drivers at Nijmegen/Chandler <span class="ev ev-c">✅</span></div>
+          </div>
+        </div>
+        <div class="prod-row">
+          <div class="prod-sup" style="color:var(--ifx)">IFX</div>
+          <div>
+            <div class="prod-chips"><span class="tag">Si</span><span class="tag">SiC</span><span class="tag">GaN</span></div>
+            <div class="chip-note">Drivers for MOSFET, IGBT, SiC and GaN confirmed <span class="ev ev-c">✅</span></div>
+          </div>
+        </div>
+        <div class="prod-row">
+          <div class="prod-sup" style="color:var(--stm)">STM</div>
+          <div>
+            <div class="prod-chips"><span class="tag">BCD</span><span class="tag">SiC</span><span class="tag">STI2GaN</span></div>
+            <div class="chip-note">"Gate drivers for MOSFET, IGBT, SiC and GaN" — STM_2025 <span class="ev ev-c">✅</span></div>
+          </div>
+        </div>
+        <div class="prod-row">
+          <div class="prod-sup" style="color:var(--adi)">ADI</div>
+          <div>
+            <div class="prod-chips"><span class="tag">BiCMOS / CMOS</span></div>
+            <div class="chip-note">Proprietary bipolar/CMOS <span class="ev ev-c">✅</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- ── 4. JV TABLE ────────────────────────────────────────────── -->
+  <div class="sec-head">
+    <div class="sec-title">JV &amp; Foundry Dependencies</div>
+    <div class="sec-rule"></div>
+    <div class="sec-note">All confirmed from annual filings</div>
+  </div>
+
+  <table class="jv-table">
+    <thead>
+      <tr>
+        <th>Supplier</th>
+        <th>JV / Foundry</th>
+        <th>Location</th>
+        <th>Wafer</th>
+        <th>Status</th>
+        <th>Buyer Risk</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><strong style="color:var(--ti)">TI</strong></td>
+        <td>None — fully owned</td>
+        <td>USA, Japan, Germany, Malaysia</td>
+        <td><span class="tag">300mm primary</span></td>
+        <td><span class="jv-status jv-active">IDM — all internal</span></td>
+        <td style="color:var(--ink-2)">Lowest foundry risk of the group</td>
+      </tr>
+      <tr>
+        <td><strong style="color:var(--nxp)">NXP</strong></td>
+        <td>SSMC (61.2% NXP + TSMC)</td>
+        <td>Singapore</td>
+        <td><span class="tag">200mm / 8"</span></td>
+        <td><span class="jv-status jv-active">Operating</span></td>
+        <td style="color:var(--ink-2)">Indirect TSMC/Taiwan exposure for NXP power products</td>
+      </tr>
+      <tr>
+        <td><strong style="color:var(--nxp)">NXP</strong></td>
+        <td>VSMC (60% NXP + Vanguard)</td>
+        <td>Singapore</td>
+        <td><span class="tag">300mm</span></td>
+        <td><span class="jv-status jv-build">Under construction</span></td>
+        <td style="color:var(--ink-2)">Vanguard is a TSMC affiliate — adds Taiwan exposure</td>
+      </tr>
+      <tr>
+        <td><strong style="color:var(--nxp)">NXP</strong> + <strong style="color:var(--ifx)">IFX</strong></td>
+        <td>ESMC (TSMC, Bosch, NXP, IFX)</td>
+        <td>Dresden, Germany</td>
+        <td><span class="tag">300mm</span></td>
+        <td><span class="jv-status jv-build">Under construction</span></td>
+        <td style="color:var(--ink-2)">European supply hedge for both NXP and IFX</td>
+      </tr>
+      <tr>
+        <td><strong style="color:var(--stm)">STM</strong></td>
+        <td>GlobalFoundries JV (Crolles)</td>
+        <td>Crolles, France</td>
+        <td><span class="tag">300mm</span></td>
+        <td><span class="jv-status jv-active">Operating</span></td>
+        <td style="color:var(--ink-2)">EU CHIPS funding received. GF financial stability a watch item.</td>
+      </tr>
+      <tr>
+        <td><strong style="color:var(--stm)">STM</strong></td>
+        <td>Sanan Optoelectronics (SiC)</td>
+        <td>Chongqing, China</td>
+        <td><span class="tag">200mm SiC</span></td>
+        <td><span class="jv-status jv-new">New — 2023</span></td>
+        <td style="color:var(--ink-2)">China-based JV — geopolitical and export control exposure</td>
+      </tr>
+      <tr>
+        <td><strong style="color:var(--adi)">ADI</strong></td>
+        <td>TSMC + other foundries</td>
+        <td>Taiwan (primary)</td>
+        <td><span class="tag tag-na">Not disclosed</span></td>
+        <td><span class="jv-status jv-active">Ongoing</span></td>
+        <td style="color:var(--ink-2)">&gt;50% from TSMC — highest foundry concentration. Flagged in ADI 10-K as material risk.</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <!-- ── 5. OBSERVATIONS ───────────────────────────────────────── -->
+  <div class="sec-head">
+    <div class="sec-title">Key Observations for Procurement</div>
+    <div class="sec-rule"></div>
+  </div>
+
+  <div class="obs-grid">
+    <div class="obs-card" style="border-left-color:var(--ti)">
+      <div class="obs-title" style="color:var(--ti)">TI: Cost leader via 300mm</div>
+      <div class="obs-text">40% unit cost advantage vs 200mm confirmed by management. Basis for requesting cost pass-through in negotiation — grounded in TI's own 10-K disclosure.</div>
+    </div>
+    <div class="obs-card" style="border-left-color:var(--stm)">
+      <div class="obs-title" style="color:var(--stm)">STM: Most transparent</div>
+      <div class="obs-text">Best process disclosure of all five suppliers — BCD and VIPpower confirmed per fab. Qualification and supply chain risk assessment is easier for STM than for TI.</div>
+    </div>
+    <div class="obs-card" style="border-left-color:var(--ifx)">
+      <div class="obs-title" style="color:var(--ifx)">IFX: Broadest wide bandgap</div>
+      <div class="obs-text">Only supplier to confirm Si, SiC and GaN gate driver capability in one filing. SiC/GaN gate driver technology lead creates a real switching cost — factor into negotiation.</div>
+    </div>
+    <div class="obs-card" style="border-left-color:var(--nxp)">
+      <div class="obs-title" style="color:var(--nxp)">NXP: Indirect TSMC exposure</div>
+      <div class="obs-text">SSMC Singapore (61.2% NXP / TSMC JV) is the likely manufacturing site for NXP power products. Same Taiwan Strait exposure as ADI — less visible but equally real.</div>
+    </div>
+    <div class="obs-card" style="border-left-color:var(--adi)">
+      <div class="obs-title" style="color:var(--adi)">ADI: Highest foundry risk</div>
+      <div class="obs-text">ADI is the only supplier to explicitly flag Taiwan Strait risk in its annual filing. Fab-lite model maximises margins but creates maximum foundry dependency if TSMC is disrupted.</div>
+    </div>
+    <div class="obs-card" style="border-left-color:#6b8cda">
+      <div class="obs-title" style="color:#3b4da8">Product nodes need PPAP data</div>
+      <div class="obs-text">Specific process nodes (e.g. 130nm BCD) are not disclosed in any public filing. Part-level process and approved site data requires PPAP package analysis — a Phase 2 capability.</div>
+    </div>
+  </div>
+
+  <div class="footer-note">
+    <strong>Sources:</strong> TI 10-K FY2025 · NXP 20-F FY2025 (explicit fab table with wafer sizes and line widths) · Infineon Annual Report FY2025 · STM 20-F FY2025 (full 14-site fab table) · ADI 10-K FY2025.
+  </div>
+
+</div>
+</body>
+</html>

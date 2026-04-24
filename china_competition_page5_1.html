@@ -1,0 +1,596 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ABC Semiconductor — China Competition</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --ink:#0f1117; --ink-2:#2d3142; --ink-3:#5c6078; --ink-4:#8b90a7;
+    --rule:#e2e4ea; --surface:#f7f8fc; --white:#ffffff;
+    --red:#dc2626; --amber:#d97706; --green:#16a34a; --blue:#1d4ed8;
+    --cn-red:#c0392b; --cn-gold:#d4a017;
+    --confirmed:#22c55e; --analysis:#6b8cda; --assumption:#aaa;
+    --font:'DM Sans',sans-serif; --mono:'DM Mono',monospace;
+  }
+  *{box-sizing:border-box;margin:0;padding:0;}
+  body{font-family:var(--font);background:var(--white);color:var(--ink);font-size:13px;line-height:1.5;}
+
+  nav{background:var(--ink);padding:0 28px;display:flex;align-items:center;height:48px;position:sticky;top:0;z-index:100;}
+  .nav-logo{color:#fff;font-size:13px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;margin-right:36px;white-space:nowrap;}
+  .nav-logo span{color:#DAA520;}
+  .nav-tabs{display:flex;height:100%;}
+  .nav-tab{color:rgba(255,255,255,.5);font-size:12px;font-weight:500;padding:0 18px;display:flex;align-items:center;cursor:pointer;border-bottom:2px solid transparent;text-decoration:none;white-space:nowrap;transition:all .15s;}
+  .nav-tab:hover{color:rgba(255,255,255,.85);}
+  .nav-tab.active{color:#fff;border-bottom-color:#DAA520;}
+  .nav-right{margin-left:auto;color:rgba(255,255,255,.4);font-size:11px;font-family:var(--mono);}
+
+  .page-header{background:var(--white);border-bottom:1px solid var(--rule);padding:18px 28px 14px;display:flex;align-items:flex-start;justify-content:space-between;gap:20px;}
+  .page-title{font-size:18px;font-weight:600;}
+  .page-sub{font-size:12px;color:var(--ink-3);margin-top:3px;}
+
+  .main{padding:20px 28px;max-width:1200px;}
+
+  /* Source legend */
+  .source-legend{display:flex;gap:16px;flex-wrap:wrap;padding:10px 14px;background:var(--surface);border:1px solid var(--rule);border-radius:6px;margin-bottom:20px;}
+  .sl-item{display:flex;align-items:center;gap:6px;font-size:11px;color:var(--ink-2);}
+  .sl-swatch{width:10px;height:14px;border-radius:2px;border-left:2px solid;}
+  .sl-c{background:#f0fdf4;border-color:var(--confirmed);}
+  .sl-a{background:#f0f4ff;border-color:var(--analysis);}
+  .sl-w{background:#f5f5f5;border-color:var(--assumption);}
+
+  /* Section head */
+  .sec-head{margin:22px 0 13px;display:flex;align-items:center;gap:12px;}
+  .sec-title{font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.07em;color:var(--ink-3);white-space:nowrap;}
+  .sec-rule{flex:1;height:1px;background:var(--rule);}
+  .sec-note{font-size:10px;color:var(--ink-4);font-family:var(--mono);white-space:nowrap;}
+
+  /* Context banner */
+  .context-banner{padding:14px 16px;background:#fff8f0;border:1px solid #fde68a;border-left:4px solid var(--cn-gold);border-radius:7px;margin-bottom:20px;}
+  .context-banner-title{font-size:12px;font-weight:600;color:#92400e;margin-bottom:5px;}
+  .context-banner-text{font-size:11px;color:#78350f;line-height:1.7;}
+
+  /* Anti-dumping alert */
+  .alert-bar{padding:12px 16px;background:#fef2f2;border:1px solid #fecaca;border-left:4px solid var(--red);border-radius:7px;margin-bottom:20px;display:flex;gap:12px;align-items:flex-start;}
+  .alert-icon{font-size:16px;flex-shrink:0;}
+  .alert-title{font-size:12px;font-weight:600;color:var(--red);margin-bottom:3px;}
+  .alert-text{font-size:11px;color:#7f1d1d;line-height:1.6;}
+
+  /* Company cards */
+  .company-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:24px;}
+  .co-card{background:var(--white);border:1px solid var(--rule);border-radius:9px;overflow:hidden;}
+  .co-head{padding:13px 16px 10px;border-bottom:1px solid var(--rule);display:flex;align-items:flex-start;justify-content:space-between;gap:12px;}
+  .co-name-block{}
+  .co-cn{font-size:11px;color:var(--ink-4);font-family:var(--mono);margin-bottom:2px;}
+  .co-name{font-size:14px;font-weight:600;color:var(--ink);}
+  .co-tagline{font-size:11px;color:var(--ink-3);margin-top:2px;}
+  .co-badges{display:flex;flex-direction:column;gap:4px;align-items:flex-end;}
+  .badge{display:inline-flex;align-items:center;gap:4px;font-size:10px;font-weight:600;padding:2px 8px;border-radius:10px;font-family:var(--mono);white-space:nowrap;}
+  .badge-listed{background:#f0fdf4;color:#166534;border:1px solid #86efac;}
+  .badge-private{background:var(--surface);color:var(--ink-3);border:1px solid var(--rule);}
+  .badge-fabless{background:#f0f4ff;color:#1e40af;border:1px solid #bfdbfe;}
+  .badge-idm{background:#0f1117;color:#fff;border:1px solid #0f1117;}
+  .badge-threat-hi{background:#fef2f2;color:var(--red);border:1px solid #fecaca;}
+  .badge-threat-md{background:#fffbeb;color:#92400e;border:1px solid #fde68a;}
+  .badge-threat-lo{background:#f0fdf4;color:#166534;border:1px solid #86efac;}
+
+  .co-body{padding:14px 16px;}
+  .co-grid2{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px;}
+  .co-kv{margin-bottom:8px;}
+  .co-kv-label{font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.05em;color:var(--ink-4);margin-bottom:2px;}
+  .co-kv-val{font-size:11px;color:var(--ink-2);line-height:1.5;}
+
+  /* Chips */
+  .chip-row{display:flex;flex-wrap:wrap;gap:5px;margin-top:4px;}
+  .chip-sm{display:inline-flex;align-items:center;gap:4px;font-size:10px;padding:2px 7px;border-radius:8px;font-family:var(--mono);}
+  .ch-c{background:#f0fdf4;color:#166534;border-left:2px solid var(--confirmed);}
+  .ch-a{background:#f0f4ff;color:#1e40af;border-left:2px solid var(--analysis);}
+  .ch-w{background:#f5f5f5;color:#555;border-left:2px solid var(--assumption);}
+
+  /* Product readiness columns */
+  .prod-row{display:flex;align-items:center;gap:10px;padding:6px 0;border-bottom:1px solid var(--rule);}
+  .prod-row:last-child{border-bottom:none;}
+  .prod-name{font-size:11px;font-weight:500;color:var(--ink);width:90px;flex-shrink:0;}
+  .prod-bars{flex:1;}
+  .prod-bar{height:10px;border-radius:3px;position:relative;}
+  .prod-bar-fill{height:100%;border-radius:3px;}
+  .prod-pct{font-size:10px;font-family:var(--mono);color:var(--ink-3);margin-left:6px;flex-shrink:0;width:30px;}
+  .prod-note{font-size:10px;color:var(--ink-3);flex:1;}
+
+  /* Technology table */
+  .tech-table{width:100%;border-collapse:collapse;margin-bottom:24px;}
+  .tech-table th{font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.05em;padding:8px 10px;border-bottom:2px solid var(--rule);text-align:left;background:var(--surface);color:var(--ink-3);}
+  .tech-table th.ctr{text-align:center;}
+  .tech-table td{padding:9px 10px;border-bottom:1px solid var(--rule);font-size:11px;vertical-align:top;}
+  .tech-table tr:last-child td{border-bottom:none;}
+
+  /* Readiness pills */
+  .ready{display:inline-flex;align-items:center;gap:4px;font-size:10px;font-weight:600;padding:2px 8px;border-radius:10px;font-family:var(--mono);}
+  .r-strong{background:#f0fdf4;color:#166534;border:1px solid #86efac;}
+  .r-growing{background:#fffbeb;color:#92400e;border:1px solid #fde68a;}
+  .r-early{background:#fef2f2;color:var(--red);border:1px solid #fecaca;}
+  .r-na{background:var(--surface);color:var(--ink-4);border:1px solid var(--rule);}
+
+  /* Procurement risk matrix */
+  .risk-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:24px;}
+  .risk-card{padding:13px 14px;border-radius:7px;border:1px solid var(--rule);background:var(--white);border-left:3px solid;}
+  .risk-title{font-size:11px;font-weight:600;margin-bottom:5px;}
+  .risk-text{font-size:11px;color:var(--ink-2);line-height:1.6;}
+  .risk-ev{font-size:10px;margin-top:6px;padding:3px 7px;border-radius:4px;display:inline-block;}
+  .ev-c{background:#f0fdf4;color:#166534;border-left:2px solid var(--confirmed);}
+  .ev-a{background:#f0f4ff;color:#1e40af;border-left:2px solid var(--analysis);}
+  .ev-w{background:#f5f5f5;color:#555;border-left:2px solid var(--assumption);}
+
+  .footer-note{font-size:10px;color:var(--ink-4);line-height:1.6;padding-top:14px;border-top:1px solid var(--rule);}
+</style>
+</head>
+<body>
+
+<nav>
+  <div class="nav-logo">ABC <span>Semi</span> · Procurement Intelligence</div>
+  <div class="nav-tabs">
+    <a class="nav-tab" href="#">Spend Distribution</a>
+    <a class="nav-tab" href="#">Financial Analytics</a>
+    <a class="nav-tab" href="#">Negotiation Leverage</a>
+    <a class="nav-tab" href="#">Fab Footprint</a>
+    <a class="nav-tab active" href="#">China Competition</a>
+  </div>
+  <div class="nav-right">Web sources · Mar 2026</div>
+</nav>
+
+<div class="page-header">
+  <div>
+    <div class="page-title">China Power Management IC — Competitive Landscape</div>
+    <div class="page-sub">PMIC · LDO · Gate Drivers · Domestic supplier viability · Technology readiness · Procurement implications</div>
+  </div>
+</div>
+
+<div class="main">
+
+  <!-- SOURCE LEGEND -->
+  <div class="source-legend">
+    <div class="sl-item"><div class="sl-swatch sl-c"></div><strong>Confirmed</strong> — company annual reports, exchange filings, press releases</div>
+    <div class="sl-item"><div class="sl-swatch sl-a"></div><strong>Analysis</strong> — derived from confirmed data or industry reports</div>
+    <div class="sl-item"><div class="sl-swatch sl-w"></div><strong>Working assumption</strong> — inference, secondary sources, not independently verified</div>
+    <div style="margin-left:auto;font-size:10px;color:var(--ink-4);font-family:var(--mono)">This page is web-sourced — no 10-K/annual report filings available for non-listed companies</div>
+  </div>
+
+  <!-- CONTEXT BANNER -->
+  <div class="context-banner">
+    <div class="context-banner-title">Why This Matters for Procurement</div>
+    <div class="context-banner-text">
+      Chinese domestic PMIC and LDO suppliers have been gaining share in China's industrial and automotive markets rapidly since 2021 — accelerated by the chip shortage and localisation pressure. For Western buyers, the immediate question is not "should we buy from Chinese suppliers" but rather: <strong>how much are Chinese suppliers displacing Western incumbents in the China market</strong> (reducing those suppliers' China revenue and thus increasing their pressure to negotiate globally), and <strong>are any Chinese players ready to qualify in Western supply chains?</strong> The answers differ by product category and by application grade.
+    </div>
+  </div>
+
+  <!-- ANTI-DUMPING ALERT -->
+  <div class="alert-bar">
+    <div class="alert-icon">⚠</div>
+    <div>
+      <div class="alert-title">China Anti-Dumping Investigation — September 2025 (Active)</div>
+      <div class="alert-text">
+        China's Ministry of Commerce (MOFCOM) initiated an anti-dumping investigation in September 2025 specifically targeting <strong>gate driver ICs and general-purpose interface chips</strong> imported from the United States. The investigation covers products from TI and ADI specifically and runs until at least September 2026. MOFCOM stated that US mature-node IC import volume increased 37% from 2022–2024 while import prices fell 52%, which "lowered and suppressed domestic sales prices." This is a direct policy tailwind for Chinese gate driver suppliers including Southchip and SG Micro. <strong>Procurement implication: if this results in tariffs on US-origin gate driver ICs sold into China, it changes the cost calculus for buyers with China-based manufacturing.</strong>
+        <div class="chip-row" style="margin-top:6px">
+          <span class="chip-sm ch-c">✅ Confirmed · MOFCOM announcement Sep 2025 via SemiWiki / SCMP</span>
+          <span class="chip-sm ch-c">✅ Products: Low-side, half-bridge, isolated gate driver ICs</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SECTION 1: COMPANY PROFILES -->
+  <div class="sec-head">
+    <div class="sec-title">Domestic Chinese Supplier Profiles</div>
+    <div class="sec-rule"></div>
+    <div class="sec-note">4 most relevant players for PMIC / LDO / Gate Drivers</div>
+  </div>
+
+  <div class="company-grid">
+
+    <!-- SILERGY -->
+    <div class="co-card">
+      <div class="co-head">
+        <div class="co-name-block">
+          <div class="co-cn">矽力杰半导体 · TWSE: 6415</div>
+          <div class="co-name">Silergy Corp</div>
+          <div class="co-tagline">PMIC specialist · Taiwan-listed · Fabless · Founded Sunnyvale CA 2008</div>
+        </div>
+        <div class="co-badges">
+          <span class="badge badge-listed">● Listed TWSE</span>
+          <span class="badge badge-fabless">Fabless</span>
+          <span class="badge badge-threat-md">⚡ Medium threat</span>
+        </div>
+      </div>
+      <div class="co-body">
+        <div class="co-grid2">
+          <div>
+            <div class="co-kv">
+              <div class="co-kv-label">Revenue</div>
+              <div class="co-kv-val">~NT$25B (~$780M USD) FY2024 est. Q3-24 revenues NT$6B/qtr growing YoY
+                <div class="chip-row"><span class="chip-sm ch-c">✅ Q3 2024 earnings release — TWSE listed</span></div>
+              </div>
+            </div>
+            <div class="co-kv">
+              <div class="co-kv-label">Gross Margin</div>
+              <div class="co-kv-val">~53–54% (structurally high for fabless PMIC)
+                <div class="chip-row"><span class="chip-sm ch-c">✅ Annual report FY2023 filing</span></div>
+              </div>
+            </div>
+            <div class="co-kv">
+              <div class="co-kv-label">Foundry</div>
+              <div class="co-kv-val">TSMC primary + one secondary. Fabless model — no owned fabs.
+                <div class="chip-row"><span class="chip-sm ch-c">✅ Silergy 2023 Annual Report ("Company R and S")</span></div>
+              </div>
+            </div>
+          </div>
+          <div>
+            <div class="co-kv">
+              <div class="co-kv-label">Products</div>
+              <div class="co-kv-val">DC/DC, AC/DC, multi-rail PMIC, LDO, LED drivers, BMS, motor drivers, audio amplifiers
+                <div class="chip-row"><span class="chip-sm ch-c">✅ Company website / annual report</span></div>
+              </div>
+            </div>
+            <div class="co-kv">
+              <div class="co-kv-label">End Markets</div>
+              <div class="co-kv-val">Consumer (primary), industrial, computing, automotive (growing)
+                <div class="chip-row"><span class="chip-sm ch-c">✅ Annual report FY2023</span></div>
+              </div>
+            </div>
+            <div class="co-kv">
+              <div class="co-kv-label">Automotive target</div>
+              <div class="co-kv-val">15% of revenue from automotive in 2025 (goal stated by chairman)
+                <div class="chip-row"><span class="chip-sm ch-c">✅ Digitimes Nov 2024 · management statement</span></div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="co-kv">
+          <div class="co-kv-label">Technology Maturity &amp; Customers</div>
+          <div class="co-kv-val">Silergy is the most technically capable Chinese PMIC supplier. Products cover 0.7V–100V input range. TSMC-manufactured — same process quality as ADI. Strong recurring customer base in smartphones (Xiaomi, OPPO), tablets, laptops, and server power supply. Automotive customer base growing but primarily China-domestic Tier 1s. <strong>No confirmed Western OEM design wins in automotive-grade PMIC.</strong> Western qualification track record is limited — products appear in consumer/industrial applications sold outside China through distribution.
+            <div class="chip-row" style="margin-top:5px">
+              <span class="chip-sm ch-c">✅ Product portfolio — company website confirmed</span>
+              <span class="chip-sm ch-w">◆ Western OEM qualification — not confirmed, inference from product literature</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- SG MICRO -->
+    <div class="co-card">
+      <div class="co-head">
+        <div class="co-name-block">
+          <div class="co-cn">圣邦微电子 · SZSE: 300661</div>
+          <div class="co-name">SG Micro (SGMICRO)</div>
+          <div class="co-tagline">Analog IC specialist · Founded 2007 by ex-TI engineer · Shenzhen listed</div>
+        </div>
+        <div class="co-badges">
+          <span class="badge badge-listed">● Listed SZSE</span>
+          <span class="badge badge-fabless">Fabless</span>
+          <span class="badge badge-threat-md">⚡ Medium threat</span>
+        </div>
+      </div>
+      <div class="co-body">
+        <div class="co-grid2">
+          <div>
+            <div class="co-kv">
+              <div class="co-kv-label">Revenue</div>
+              <div class="co-kv-val">~¥3.33B (~$460M USD) FY2024
+                <div class="chip-row"><span class="chip-sm ch-c">✅ Craft.co / SZSE filing data</span></div>
+              </div>
+            </div>
+            <div class="co-kv">
+              <div class="co-kv-label">Founded by</div>
+              <div class="co-kv-val">Zhang Shilong — former Texas Instruments engineer. Initial focus on op-amps and LDOs mimicking TI's portfolio approach.
+                <div class="chip-row"><span class="chip-sm ch-c">✅ Wikipedia / company history</span></div>
+              </div>
+            </div>
+            <div class="co-kv">
+              <div class="co-kv-label">Foundry</div>
+              <div class="co-kv-val">TSMC primary. Fabless.
+                <div class="chip-row"><span class="chip-sm ch-c">✅ Company website</span></div>
+              </div>
+            </div>
+          </div>
+          <div>
+            <div class="co-kv">
+              <div class="co-kv-label">Products</div>
+              <div class="co-kv-val">Op-amps, LDO, PMIC, signal chain, interface. Growing power management range 0–100V.
+                <div class="chip-row"><span class="chip-sm ch-c">✅ Company website product catalog</span></div>
+              </div>
+            </div>
+            <div class="co-kv">
+              <div class="co-kv-label">China market share (2021)</div>
+              <div class="co-kv-val">30% of China mobile PMIC market, 40% of China industrial PMIC market
+                <div class="chip-row"><span class="chip-sm ch-c">✅ Industry report cited in Wikipedia entry</span></div>
+              </div>
+            </div>
+            <div class="co-kv">
+              <div class="co-kv-label">End Markets</div>
+              <div class="co-kv-val">Industrial (primary), automotive (growing), consumer, communications
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="co-kv">
+          <div class="co-kv-label">Technology Maturity &amp; Customers</div>
+          <div class="co-kv-val">SG Micro's approach is explicitly analogous to early TI: broad catalog, TSMC-manufactured CMOS processes, high-performance LDO with low noise. LDO products (SGM38xxx series) are technically competitive at the sub-100mA range. However, complex multi-rail PMIC and high-current applications are less mature. <strong>Primary customer base is China domestic industrial and consumer OEMs.</strong> Low-noise LDO could be viable for some industrial non-automotive applications globally but Western OEM design wins are not confirmed. Anti-dumping investigation is a direct tailwind for SG Micro in the China market.
+            <div class="chip-row" style="margin-top:5px">
+              <span class="chip-sm ch-c">✅ Product specs — company datasheet for SGM38121 LDO PMIC</span>
+              <span class="chip-sm ch-w">◆ Western OEM design wins — not confirmed from public sources</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- BYD SEMICONDUCTOR -->
+    <div class="co-card">
+      <div class="co-head">
+        <div class="co-name-block">
+          <div class="co-cn">比亚迪半导体 · BYD Group subsidiary</div>
+          <div class="co-name">BYD Semiconductor</div>
+          <div class="co-tagline">Captive IDM · EV-focused · Founded 2002 · Not independently listed</div>
+        </div>
+        <div class="co-badges">
+          <span class="badge badge-private">◎ Not listed</span>
+          <span class="badge badge-idm">IDM</span>
+          <span class="badge badge-threat-lo">Low external threat</span>
+        </div>
+      </div>
+      <div class="co-body">
+        <div class="co-grid2">
+          <div>
+            <div class="co-kv">
+              <div class="co-kv-label">Parent</div>
+              <div class="co-kv-val">BYD Co. Ltd — world's largest EV producer, 4.27M EVs delivered in 2024
+                <div class="chip-row"><span class="chip-sm ch-c">✅ BYD annual report 2024 · Nomad Semi analysis</span></div>
+              </div>
+            </div>
+            <div class="co-kv">
+              <div class="co-kv-label">Manufacturing</div>
+              <div class="co-kv-val">IDM — owns 6-inch fab in Ningbo (acquired from TSMC Fab 1 in 2005 via SinoMOS). IGBT + SiC + control IC manufacturing.
+                <div class="chip-row"><span class="chip-sm ch-c">✅ Nomad Semi deep-dive · public record</span></div>
+              </div>
+            </div>
+            <div class="co-kv">
+              <div class="co-kv-label">Products</div>
+              <div class="co-kv-val">IGBT modules, SiC MOSFETs, MCU, PMIC (Smart Control IC), sensors, optoelectronics
+                <div class="chip-row"><span class="chip-sm ch-c">✅ Nomad Semi analysis · company profile</span></div>
+              </div>
+            </div>
+          </div>
+          <div>
+            <div class="co-kv">
+              <div class="co-kv-label">Primary Customer</div>
+              <div class="co-kv-val">BYD vehicles — ~70% of BYD components are sourced in-house. Captive supply.
+                <div class="chip-row"><span class="chip-sm ch-c">✅ Nomad Semi / BYD annual disclosure</span></div>
+              </div>
+            </div>
+            <div class="co-kv">
+              <div class="co-kv-label">PMIC/MCU status</div>
+              <div class="co-kv-val">Smart Control IC segment = MCU + PMIC. AEC-Q100 Grade 1 certified (BMS AFE IC confirmed 2020). External customer qualification ongoing.
+                <div class="chip-row"><span class="chip-sm ch-c">✅ Industry report 2023 · MOFCOM filing</span></div>
+              </div>
+            </div>
+            <div class="co-kv">
+              <div class="co-kv-label">Wafer technology</div>
+              <div class="co-kv-val">6-inch fab (legacy TSMC Fab 1 technology — circa 2004 vintage). IGBT on this fab. More advanced products outsourced.
+                <div class="chip-row"><span class="chip-sm ch-c">✅ Nomad Semi deep-dive April 2025</span></div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="co-kv">
+          <div class="co-kv-label">External Threat Assessment</div>
+          <div class="co-kv-val">BYD Semiconductor is fundamentally a <strong>captive supplier to BYD's own EV production.</strong> Its strategic value is cost reduction and supply security for BYD — not competing in the open market. Some external qualification is occurring but volume to non-BYD customers is minimal and not the strategic priority. For Western procurement teams, BYD Semiconductor is not a realistic near-term alternative. Its primary relevance is as evidence that Chinese IDM capability is growing — and as a signal that BYD is reducing its dependence on Western PMIC/gate driver suppliers for its EV platforms.
+            <div class="chip-row" style="margin-top:5px">
+              <span class="chip-sm ch-a">🔢 Analysis · from public BYD vertical integration disclosures</span>
+              <span class="chip-sm ch-w">◆ External sales volume — not disclosed publicly</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- SOUTHCHIP -->
+    <div class="co-card">
+      <div class="co-head">
+        <div class="co-name-block">
+          <div class="co-cn">圣邦泛微 · SZSE: 688484</div>
+          <div class="co-name">Southchip Semiconductor</div>
+          <div class="co-tagline">Automotive analog IC · Listed SZSE STAR Market · Fabless · Shanghai</div>
+        </div>
+        <div class="co-badges">
+          <span class="badge badge-listed">● Listed SZSE STAR</span>
+          <span class="badge badge-fabless">Fabless</span>
+          <span class="badge badge-threat-lo">Low-medium threat</span>
+        </div>
+      </div>
+      <div class="co-body">
+        <div class="co-grid2">
+          <div>
+            <div class="co-kv">
+              <div class="co-kv-label">Revenue</div>
+              <div class="co-kv-val">Small — exact figure not available from public search. Listed on SZSE STAR Market (688484).
+                <div class="chip-row"><span class="chip-sm ch-c">✅ SZSE listing confirmed · Investing.com profile</span></div>
+              </div>
+            </div>
+            <div class="co-kv">
+              <div class="co-kv-label">Products</div>
+              <div class="co-kv-val">Automotive LDO, DC/DC (buck/boost), PMIC/SBC, high-side drivers, motor drivers, USB PD, wireless chargers, gate drivers (eFuses, high-side)
+                <div class="chip-row"><span class="chip-sm ch-c">✅ Investing.com company profile · product catalog</span></div>
+              </div>
+            </div>
+          </div>
+          <div>
+            <div class="co-kv">
+              <div class="co-kv-label">Certifications</div>
+              <div class="co-kv-val">AEC-Q100 certified products — automotive-grade qualification confirmed
+                <div class="chip-row"><span class="chip-sm ch-c">✅ Industry report 2023 · company press releases</span></div>
+              </div>
+            </div>
+            <div class="co-kv">
+              <div class="co-kv-label">Known Customers</div>
+              <div class="co-kv-val">BYD, SAIC-GM, FAW Hongqi, Hyundai. "Several overseas models soon" (2023 statement)
+                <div class="chip-row"><span class="chip-sm ch-c">✅ ResearchAndMarkets industry report 2023</span></div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="co-kv">
+          <div class="co-kv-label">Technology Maturity &amp; Assessment</div>
+          <div class="co-kv-val">Southchip is the most automotive-focused of the pure-play Chinese PMIC/LDO companies. AEC-Q100 certification and confirmed design wins at Tier 1 automotive OEMs including one Korean OEM (Hyundai) suggest they have crossed the automotive qualification threshold. Products focus on DC/DC and LDO for smart cockpit, ADAS power supply, and EV charging. Gate driver products exist (high-side, eFuse) but are not automotive-grade SiC/GaN gate drivers. <strong>Most credible near-term substitute for low-complexity automotive LDO applications in China-based manufacturing.</strong> Western supply chain penetration is early — "several overseas models" was a forward-looking 2023 statement and status of those wins is not confirmed.
+            <div class="chip-row" style="margin-top:5px">
+              <span class="chip-sm ch-c">✅ AEC-Q100 certification confirmed · industry reports</span>
+              <span class="chip-sm ch-w">◆ Overseas model wins — stated in 2023, status unconfirmed as of Mar 2026</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- SECTION 2: TECHNOLOGY READINESS BY PRODUCT -->
+  <div class="sec-head">
+    <div class="sec-title">Technology Readiness Assessment by Product Category</div>
+    <div class="sec-rule"></div>
+    <div class="sec-note">◆ Based on public product literature and industry reports — not independently tested</div>
+  </div>
+
+  <table class="tech-table">
+    <thead>
+      <tr>
+        <th>Product</th>
+        <th>Application Grade</th>
+        <th>Silergy</th>
+        <th>SG Micro</th>
+        <th>BYD Semi</th>
+        <th>Southchip</th>
+        <th>Technology Gap vs Western Tier</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><strong>LDO</strong></td>
+        <td>Consumer / Industrial</td>
+        <td><span class="ready r-strong">● Strong</span></td>
+        <td><span class="ready r-strong">● Strong</span></td>
+        <td><span class="ready r-growing">◑ Growing</span></td>
+        <td><span class="ready r-growing">◑ Growing</span></td>
+        <td style="font-size:11px;color:var(--ink-2)">Narrow for simple LDO (100mA class). Wider for high-current, multi-rail LDO. Chinese fabs now producing BCD processes. <span class="chip-sm ch-a" style="display:inline-flex">🔢 Analysis</span></td>
+      </tr>
+      <tr>
+        <td><strong>LDO</strong></td>
+        <td>Automotive (AEC-Q100)</td>
+        <td><span class="ready r-growing">◑ Growing</span></td>
+        <td><span class="ready r-early">◌ Early</span></td>
+        <td><span class="ready r-growing">◑ Growing</span></td>
+        <td><span class="ready r-strong">● Confirmed</span></td>
+        <td style="font-size:11px;color:var(--ink-2)">Southchip has AEC-Q100 confirmed. Others are earlier stage. Gap is qualification track record and functional safety (ISO 26262) rather than silicon performance per se. <span class="chip-sm ch-c" style="display:inline-flex">✅ Confirmed for Southchip</span></td>
+      </tr>
+      <tr>
+        <td><strong>PMIC</strong></td>
+        <td>Consumer / Industrial</td>
+        <td><span class="ready r-strong">● Strong</span></td>
+        <td><span class="ready r-growing">◑ Growing</span></td>
+        <td><span class="ready r-early">◌ Early</span></td>
+        <td><span class="ready r-growing">◑ Growing</span></td>
+        <td style="font-size:11px;color:var(--ink-2)">Silergy is genuinely competitive for consumer PMIC and growing in industrial. Complex multi-rail PMIC (8+ rails, sequencing, telemetry) less mature than TI/ADI. <span class="chip-sm ch-a" style="display:inline-flex">🔢 Analysis from product specs</span></td>
+      </tr>
+      <tr>
+        <td><strong>PMIC</strong></td>
+        <td>Automotive (ASIL-B/D)</td>
+        <td><span class="ready r-early">◌ Early</span></td>
+        <td><span class="ready r-early">◌ Early</span></td>
+        <td><span class="ready r-growing">◑ BMS AFE confirmed</span></td>
+        <td><span class="ready r-growing">◑ SBC/PMIC for cockpit</span></td>
+        <td style="font-size:11px;color:var(--ink-2)">Significant gap for ASIL-D automotive PMIC (e.g. NXP FS04, IFX OPTIREG class). Functional safety, long qualification cycles, and OEM approval processes are the primary barriers — not chip performance. <span class="chip-sm ch-w" style="display:inline-flex">◆ Working assumption</span></td>
+      </tr>
+      <tr>
+        <td><strong>Gate Drivers</strong></td>
+        <td>Si MOSFET / IGBT</td>
+        <td><span class="ready r-early">◌ Not primary focus</span></td>
+        <td><span class="ready r-early">◌ Early</span></td>
+        <td><span class="ready r-growing">◑ IGBT drivers — captive</span></td>
+        <td><span class="ready r-growing">◑ High-side / eFuse</span></td>
+        <td style="font-size:11px;color:var(--ink-2)">Chinese suppliers can drive Si MOSFETs for consumer/industrial applications. Anti-dumping investigation targets this specific category — could accelerate domestic substitution in China. <span class="chip-sm ch-c" style="display:inline-flex">✅ Anti-dumping scope confirmed</span></td>
+      </tr>
+      <tr>
+        <td><strong>Gate Drivers</strong></td>
+        <td>SiC / GaN (automotive)</td>
+        <td><span class="ready r-na">— Not present</span></td>
+        <td><span class="ready r-na">— Not present</span></td>
+        <td><span class="ready r-early">◌ Internal R&amp;D only</span></td>
+        <td><span class="ready r-na">— Not present</span></td>
+        <td style="font-size:11px;color:var(--ink-2)">No Chinese supplier has a commercially-available, externally-qualified SiC or GaN gate driver at the level of IFX, STM or TI. This is a multi-year gap. IFX's market leadership is secure for this sub-category. <span class="chip-sm ch-a" style="display:inline-flex">🔢 Analysis from public product catalogs</span></td>
+      </tr>
+    </tbody>
+  </table>
+
+  <!-- SECTION 3: PROCUREMENT RISK MATRIX -->
+  <div class="sec-head">
+    <div class="sec-title">Procurement Risk &amp; Opportunity Matrix</div>
+    <div class="sec-rule"></div>
+  </div>
+
+  <div class="risk-grid">
+
+    <div class="risk-card" style="border-left-color:#16a34a">
+      <div class="risk-title" style="color:#166534">China Market Revenue Risk to Western Suppliers</div>
+      <div class="risk-text">Chinese PMIC/LDO suppliers are displacing TI, NXP and IFX in the China domestic market — particularly in consumer and industrial. This reduces Western suppliers' China revenue, which increases their pressure to be competitive globally. This is already reflected in the negotiation leverage scores for STM and IFX — China volume loss is part of the utilisation problem.
+      </div>
+      <div class="risk-ev ev-a">🔢 Analysis — derived from supplier revenue trends and domestic market reports</div>
+    </div>
+
+    <div class="risk-card" style="border-left-color:var(--amber)">
+      <div class="risk-title" style="color:#92400e">Gate Driver Anti-Dumping — China Manufacturing Impact</div>
+      <div class="risk-text">If China imposes anti-dumping tariffs on US-origin gate driver ICs (TI, ADI), buyers with China-based manufacturing will face a cost increase on US-sourced gate drivers. This creates an incentive to qualify Chinese alternatives (Southchip, SG Micro) for China-market production while maintaining Western suppliers for export markets. Dual-sourcing by geography may become necessary.
+      </div>
+      <div class="risk-ev ev-c">✅ MOFCOM investigation confirmed Sep 2025 — gate drivers in scope</div>
+    </div>
+
+    <div class="risk-card" style="border-left-color:var(--blue)">
+      <div class="risk-title" style="color:#1e40af">Western Supply Chain Entry — Timeline Assessment</div>
+      <div class="risk-text">Silergy is the most likely near-term entrant into Western industrial supply chains for standard LDO and DC/DC. SG Micro is a longer path given less automotive focus. BYD Semiconductor is captive. Southchip is automotive-qualified in China but Western OEM approval is likely 2–3+ years away.  SiC/GaN gate drivers: not credible within a 5-year horizon from any Chinese supplier.
+      </div>
+      <div class="risk-ev ev-w">◆ Working assumption — timeline based on typical automotive qualification cycles</div>
+    </div>
+
+    <div class="risk-card" style="border-left-color:var(--red)">
+      <div class="risk-title" style="color:var(--red)">Geopolitical Export Control Risk</div>
+      <div class="risk-text">US export controls on semiconductor equipment have limited Chinese fabs' ability to advance beyond mature nodes (~28nm). For PMIC and LDO (which use BCD processes at 130–180nm), this is not a barrier — the relevant nodes are outside export control scope. For advanced SiC/GaN gate drivers, equipment access constraints may slow Chinese development further.
+      </div>
+      <div class="risk-ev ev-a">🔢 Analysis — based on publicly reported US export control scope (Commerce BIS)</div>
+    </div>
+
+    <div class="risk-card" style="border-left-color:var(--ink-3)">
+      <div class="risk-title" style="color:var(--ink-2)">TSMC Dependency of Chinese Fabless Players</div>
+      <div class="risk-text">Silergy and SG Micro both use TSMC as their primary foundry. This means they share the same Taiwan geopolitical risk as ADI — and are subject to the same US export controls that restrict TSMC from supplying Chinese companies with advanced nodes if those controls were extended. At current mature node usage (BCD 130–180nm), this is not a near-term risk, but it is a structural dependency.
+      </div>
+      <div class="risk-ev ev-c">✅ TSMC reliance confirmed — SG Micro website, Silergy 2023 annual report</div>
+    </div>
+
+    <div class="risk-card" style="border-left-color:#6a1b9a">
+      <div class="risk-title" style="color:#6a1b9a">Procurement Action — What to Watch</div>
+      <div class="risk-text">
+        <strong>Watch now:</strong> MOFCOM anti-dumping ruling (due ~Sep 2026) — determines if tariffs apply to your China-manufactured gate driver purchases.<br><br>
+        <strong>Evaluate:</strong> Silergy and Southchip for simple LDO (100–500mA) in China-market industrial products — lowest risk, least qualification friction.<br><br>
+        <strong>Do not qualify yet:</strong> Any Chinese supplier for automotive-grade PMIC (ASIL-D), SiC/GaN gate drivers, or complex multi-rail PMICs in safety-critical applications.
+      </div>
+      <div class="risk-ev ev-w">◆ Working assumption — procurement judgement based on technology readiness analysis</div>
+    </div>
+
+  </div>
+
+  <div class="footer-note">
+    <strong>Data sources:</strong> SG Micro (SGMICRO) — company website, Wikipedia, SZSE listing (300661), Craft.co revenue data · Silergy Corp — Taiwan Stock Exchange filing 6415, 2023 Annual Report, Digitimes Nov 2024 · BYD Semiconductor — Nomad Semi deep-dive April 2025, BYD annual report, industry reports · Southchip — SZSE STAR Market listing (688484), Investing.com company profile, ResearchAndMarkets industry report 2023, BusinessWire/GlobeNewswire press releases · China anti-dumping investigation — MOFCOM announcement Sep 2025 reported by SCMP, SemiWiki, Digitimes.
+    <br><br>
+    <strong>Important caveat:</strong> This page is based on web sources, company websites and secondary industry reports — not primary 10-K/annual report filings. Unlike the Financial Analytics and Negotiation Leverage pages, data quality is lower and should be treated as directional intelligence rather than verified fact. Revenue figures for unlisted companies are estimates. Technology readiness assessments are based on publicly available product literature and have not been independently tested.
+  </div>
+
+</div>
+</body>
+</html>

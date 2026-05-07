@@ -1,0 +1,782 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ABC Semiconductor — Financial Analytics v2</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --ink: #0f1117; --ink-2: #2d3142; --ink-3: #5c6078;
+    --rule: #e2e4ea; --surface: #f7f8fc; --white: #ffffff;
+    --font: 'DM Sans', sans-serif; --mono: 'DM Mono', monospace;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: var(--font); background: var(--surface); color: var(--ink); font-size: 13px; }
+
+  nav {
+    background: var(--ink); padding: 0 28px;
+    display: flex; align-items: center; height: 48px;
+    position: sticky; top: 0; z-index: 100;
+  }
+  .nav-logo { color: #fff; font-size: 13px; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; margin-right: 36px; white-space: nowrap; }
+  .nav-logo span { color: #DAA520; }
+  .nav-tabs { display: flex; height: 100%; }
+  .nav-tab { color: rgba(255,255,255,0.5); font-size: 12px; font-weight: 500; padding: 0 18px; display: flex; align-items: center; cursor: pointer; border-bottom: 2px solid transparent; transition: all 0.15s; text-decoration: none; white-space: nowrap; }
+  .nav-tab:hover { color: rgba(255,255,255,0.85); }
+  .nav-tab.active { color: #fff; border-bottom-color: #DAA520; }
+  .nav-right { margin-left: auto; color: rgba(255,255,255,0.4); font-size: 11px; font-family: var(--mono); }
+
+  .page-header {
+    background: var(--white); border-bottom: 1px solid var(--rule);
+    padding: 16px 28px; display: flex; align-items: center; gap: 20px; flex-wrap: wrap;
+  }
+  .page-title { font-size: 18px; font-weight: 600; }
+  .page-sub { font-size: 12px; color: var(--ink-3); margin-top: 2px; }
+
+  /* Supplier tabs */
+  .supplier-tabs { display: flex; gap: 6px; margin-left: auto; flex-wrap: wrap; }
+  .sup-tab {
+    padding: 6px 16px; border-radius: 20px; font-size: 12px; font-weight: 600;
+    cursor: pointer; border: 2px solid transparent; transition: all 0.15s;
+    font-family: var(--mono); letter-spacing: 0.03em;
+  }
+  .sup-tab:not(.active) { background: var(--surface); color: var(--ink-3); border-color: var(--rule); }
+
+  .main { padding: 16px 28px; }
+
+  /* Insight bar */
+  .insight-bar {
+    padding: 10px 16px; border-radius: 6px; font-size: 11px; line-height: 1.5;
+    border-left: 3px solid; margin-bottom: 14px;
+    display: flex; align-items: center; gap: 10px;
+  }
+  .insight-label { font-weight: 600; margin-right: 4px; }
+
+  /* Chart grid */
+  .chart-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; }
+
+  .card {
+    background: var(--white); border: 1px solid var(--rule);
+    border-radius: 8px; overflow: hidden;
+  }
+  .card-head { padding: 10px 14px 8px; border-bottom: 1px solid var(--rule); }
+  .card-title { font-size: 11px; font-weight: 600; color: var(--ink); text-transform: uppercase; letter-spacing: 0.05em; }
+  .card-sub { font-size: 10px; color: var(--ink-3); margin-top: 2px; }
+  .card-body { padding: 12px 14px 10px; }
+  .chart-wrap { position: relative; height: 180px; }
+
+  .legend-row { display: flex; gap: 12px; flex-wrap: wrap; margin-top: 6px; }
+  .leg { display: flex; align-items: center; gap: 5px; font-size: 10px; color: var(--ink-3); }
+  .leg-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+  .leg-line { width: 16px; height: 2px; flex-shrink: 0; }
+  .leg-bar { width: 10px; height: 10px; border-radius: 2px; flex-shrink: 0; }
+  .section-head { margin: 20px 0 12px; display: flex; align-items: center; gap: 12px; }
+  .section-title { font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.07em; color: var(--ink-3); white-space: nowrap; }
+  .section-rule { flex: 1; height: 1px; background: var(--rule); }
+  .section-badge { font-size: 10px; padding: 2px 8px; border-radius: 20px; background: #f0f4ff; color: #3b4da8; font-weight: 500; white-space: nowrap; }
+  .chart-grid-4 { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; }
+  .ref-line-label { font-size: 9px; color: var(--ink-3); font-family: var(--mono); margin-top: 2px; }
+</style>
+</head>
+<body>
+<div style="background:rgba(201,168,76,0.1);border-bottom:1px solid rgba(201,168,76,0.2);padding:8px 24px;font-family:'DM Mono',monospace;font-size:10px;color:#c9a84c;text-align:center;letter-spacing:0.06em;">SAMPLE VIEW — IFX &amp; STM shown · Full 5-supplier analysis available on request · <a href="iopenspend_pitch.html" style="color:#c9a84c;text-decoration:underline;">Learn more</a></div>
+
+<nav>
+  <div class="nav-logo">ABC <span>Semi</span> · Procurement Intelligence</div>
+  <div class="nav-tabs">
+    <a class="nav-tab" href="spend_page1.html">Spend Distribution</a>
+    <a class="nav-tab active" href="#">Financial Analytics</a>
+    <a class="nav-tab" href="#">Negotiation Leverage</a>
+    <a class="nav-tab" href="#">Fab Footprint</a>
+    <a class="nav-tab" href="#">China Competition</a>
+  </div>
+  <div class="nav-right">FY2020–FY2025 · GAAP · USD</div>
+</nav>
+
+<div class="page-header">
+  <div>
+    <div class="page-title">Supplier Financial Analytics</div>
+    <div class="page-sub">Income Statement · Cash Flow · Working Capital · FY2020–FY2025</div>
+  </div>
+  <div class="supplier-tabs">
+    <div class="sup-tab active" onclick="setSupplier('IFX',this)" id="tab-IFX">IFX</div>
+    <div class="sup-tab" onclick="setSupplier('STM',this)" id="tab-STM">STM</div>
+    <div class="tab-locked" title="Full version available on request">TXN ⋯</div>
+    <div class="tab-locked" title="Full version available on request">NXP ⋯</div>
+    <div class="tab-locked" title="Full version available on request">ADI ⋯</div>
+  </div>
+</div>
+
+<div class="main">
+  <div class="insight-bar" id="insightBar"></div>
+  <div class="chart-grid">
+    <!-- Row 1 -->
+    <div class="card">
+      <div class="card-head">
+        <div class="card-title">Revenue &amp; YoY Growth</div>
+        <div class="card-sub">USD billions · annual</div>
+      </div>
+      <div class="card-body">
+        <div class="chart-wrap"><canvas id="c-rev"></canvas></div>
+        <div class="legend-row">
+          <div class="leg"><div class="leg-bar" id="l-rev-bar"></div>Revenue ($B)</div>
+          <div class="leg"><div class="leg-line" id="l-rev-line" style="background:#888"></div>YoY %</div>
+        </div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-head">
+        <div class="card-title">Gross, Operating &amp; EBITDA Margins</div>
+        <div class="card-sub">% of revenue</div>
+      </div>
+      <div class="card-body">
+        <div class="chart-wrap"><canvas id="c-margins"></canvas></div>
+        <div class="legend-row">
+          <div class="leg"><div class="leg-line" id="l-gm"></div>Gross Margin</div>
+          <div class="leg"><div class="leg-line" id="l-om"></div>Op Margin</div>
+          <div class="leg"><div class="leg-line" id="l-ebitda" style="border-top:2px dashed #888"></div>EBITDA</div>
+        </div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-head">
+        <div class="card-title">R&amp;D % of Revenue</div>
+        <div class="card-sub">research intensity trend</div>
+      </div>
+      <div class="card-body">
+        <div class="chart-wrap"><canvas id="c-rd"></canvas></div>
+        <div class="legend-row">
+          <div class="leg"><div class="leg-line" id="l-rd"></div>R&amp;D / Revenue %</div>
+        </div>
+      </div>
+    </div>
+    <!-- Row 2 -->
+    <div class="card">
+      <div class="card-head">
+        <div class="card-title">CapEx &amp; CapEx % of Revenue</div>
+        <div class="card-sub">USD billions · right axis = %</div>
+      </div>
+      <div class="card-body">
+        <div class="chart-wrap"><canvas id="c-capex"></canvas></div>
+        <div class="legend-row">
+          <div class="leg"><div class="leg-bar" id="l-capex-bar"></div>CapEx ($B)</div>
+          <div class="leg"><div class="leg-line" id="l-capex-pct" style="background:#888"></div>CapEx %</div>
+        </div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-head">
+        <div class="card-title">Capital Intensity</div>
+        <div class="card-sub">CapEx ÷ D&amp;A ratio</div>
+      </div>
+      <div class="card-body">
+        <div class="chart-wrap"><canvas id="c-intensity"></canvas></div>
+        <div class="legend-row">
+          <div class="leg"><div class="leg-line" id="l-intensity"></div>CapEx / D&amp;A (×)</div>
+        </div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-head">
+        <div class="card-title">FCF Margin</div>
+        <div class="card-sub">free cash flow as % of revenue</div>
+      </div>
+      <div class="card-body">
+        <div class="chart-wrap"><canvas id="c-fcf"></canvas></div>
+        <div class="legend-row">
+          <div class="leg"><div class="leg-line" id="l-fcf"></div>FCF Margin %</div>
+        </div>
+      </div>
+    </div>
+    <!-- Row 3 -->
+    <div class="card">
+      <div class="card-head">
+        <div class="card-title">Net Debt</div>
+        <div class="card-sub">LT Debt minus Cash · USD billions</div>
+      </div>
+      <div class="card-body">
+        <div class="chart-wrap"><canvas id="c-netdebt"></canvas></div>
+        <div class="legend-row">
+          <div class="leg"><div class="leg-bar" id="l-nd-bar"></div>Net Debt ($B)</div>
+        </div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-head">
+        <div class="card-title">DSO &amp; DPO</div>
+        <div class="card-sub">days sales &amp; payables outstanding</div>
+      </div>
+      <div class="card-body">
+        <div class="chart-wrap"><canvas id="c-dsodpo"></canvas></div>
+        <div class="legend-row">
+          <div class="leg"><div class="leg-line" id="l-dso"></div>DSO (days)</div>
+          <div class="leg"><div class="leg-line" id="l-dpo" style="border-top:2px dashed #888;background:transparent"></div>DPO (days)</div>
+        </div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-head">
+        <div class="card-title">Days of Inventory (DIO)</div>
+        <div class="card-sub">inventory ÷ COGS × 365</div>
+      </div>
+      <div class="card-body">
+        <div class="chart-wrap"><canvas id="c-dio"></canvas></div>
+        <div class="legend-row">
+          <div class="leg"><div class="leg-line" id="l-dio"></div>DIO (days)</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div><!-- /chart-grid end -->
+
+  <!-- FIXED COST & GM SENSITIVITY SECTION -->
+  <div class="section-head">
+    <div class="section-title">Fixed Cost Intensity &amp; GM Sensitivity</div>
+    <div class="section-rule"></div>
+    <div class="section-badge">Negotiation signal — fixed cost pressure · GM direction · margin sensitivity</div>
+  </div>
+
+  <div class="chart-grid-4">
+    <div class="card">
+      <div class="card-head">
+        <div class="card-title">PP&amp;E Dep / Revenue</div>
+        <div class="card-sub">fixed cost burden as % of sales</div>
+      </div>
+      <div class="card-body">
+        <div class="chart-wrap" style="height:160px"><canvas id="c-dep-rev"></canvas></div>
+        <div class="legend-row"><div class="leg"><div class="leg-line" id="l-dep-rev"></div>Dep / Rev %</div></div>
+        <div class="ref-line-label">&#8593; Higher = more fixed cost pressure when volumes fall</div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-head">
+        <div class="card-title">PP&amp;E Dep / COGS</div>
+        <div class="card-sub">fixed cost share of cost base</div>
+      </div>
+      <div class="card-body">
+        <div class="chart-wrap" style="height:160px"><canvas id="c-dep-cogs"></canvas></div>
+        <div class="legend-row"><div class="leg"><div class="leg-line" id="l-dep-cogs"></div>Dep / COGS %</div></div>
+        <div class="ref-line-label">&#8593; Higher = more underutilisation risk in downturns</div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-head">
+        <div class="card-title">GM Sensitivity</div>
+        <div class="card-sub">pp GM change per 1% revenue change · signed</div>
+      </div>
+      <div class="card-body">
+        <div class="chart-wrap" style="height:160px"><canvas id="c-gp-comp"></canvas></div>
+        <div class="legend-row"><div class="leg"><div class="leg-bar" id="l-gp-comp"></div>GM sensitivity (signed)</div></div>
+        <div class="ref-line-label">Positive = GM expanding · Negative = GM compressing · Magnitude = fixed cost intensity</div>
+        <div style="display:flex;gap:10px;margin-top:6px;flex-wrap:wrap;">
+          <div style="display:flex;align-items:center;gap:4px;font-size:10px;color:var(--ink-3)"><div style="width:10px;height:10px;border-radius:2px;background:#f87171"></div>Compressing (negative)</div>
+          <div style="display:flex;align-items:center;gap:4px;font-size:10px;color:var(--ink-3)"><div style="width:10px;height:10px;border-radius:2px;background:#4ade80"></div>Expanding (positive)</div>
+        </div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-head">
+        <div class="card-title">GM Sensitivity — Year Notes</div>
+        <div class="card-sub">Anomalies and interpretation per year</div>
+      </div>
+      <div class="card-body" style="padding:8px 10px">
+        <div id="gm-annotations" style="overflow-y:auto;max-height:220px;"></div>
+      </div>
+    </div>
+  </div>
+
+</div><!-- /main -->
+
+<script>
+const YEARS = ['FY2020','FY2021','FY2022','FY2023','FY2024','FY2025'];
+
+// ── FIXED COST DATA ────────────────────────────────────
+const FC_DATA = {
+  // gm_sens = signed: GM change pp / |rev % change| — positive = GM expanding, negative = GM compressing
+  TXN: { dep_rev:[5.07,4.12,4.62,6.71,9.64,10.85], dep_cogs:[14.12,12.65,14.78,18.08,23.03,25.24], gm_sens:[null,0.126,0.141,-0.468,-0.444,-0.086] },
+  NXP: { dep_rev:[6.01,4.94,4.17,4.56,5.17,4.56],  dep_cogs:[11.83,10.95,9.69,10.57,11.87,10.08], gm_sens:[null,0.199,0.108,-0.074,-0.090,-0.622] },
+  IFX: { dep_rev:[8.4,8.76,8.3,7.91,9.72,10.29],   dep_cogs:[12.43,14.25,14.59,14.5,16.69,16.94], gm_sens:[null,0.181,0.320,0.129,-0.446,-1.133] },
+  STM: { dep_rev:[8.26,7.46,6.9,8.47,12.5,14.86],  dep_cogs:[13.13,12.8,13.1,16.27,20.6,22.47],   gm_sens:[null,0.187,0.212,0.084,-0.370,-0.492] },
+  ADI: { dep_rev:[4.16,3.16,2.36,2.72,3.85,3.69],  dep_cogs:[12.18,8.27,6.32,7.57,8.97,9.59],    gm_sens:[null,-0.132,0.013,0.543,-0.296,0.259] }
+};
+const DATA = {
+  TXN: {
+    name: 'Texas Instruments', color: '#00D4C8',
+    rev:       [14.461,18.344,20.028,17.519,15.641,17.682],
+    rev_yoy:   [null,26.85,9.18,-12.53,-10.72,13.05],
+    gm:        [64.1,67.47,68.76,62.9,58.14,57.02],
+    om:        [40.76,48.84,50.63,41.85,34.94,34.06],
+    ebitda_m:  [47.62,54.04,55.52,48.91,45.04,45.37],
+    rd_pct:    [10.58,8.47,8.34,10.63,12.52,11.78],
+    capex:     [0.649,2.462,2.797,5.071,4.82,4.55],
+    capex_pct: [4.49,13.42,13.97,28.95,30.82,25.73],
+    cap_intensity:[0.65,2.58,2.86,4.1,3.05,2.28],
+    fcf_m:     [37.96,34.31,29.57,7.7,9.58,14.72],
+    net_debt:  [3.141,2.61,5.185,7.66,9.646,10.323],
+    dso:       [36,34,35,37,40,41],
+    dpo:       [29,40,50,45,46,36],
+    dio:       [137,117,161,225,252,231],
+    insight: 'TXN saw strong revenue peak in FY2022 (+38% from FY2020), then erosion in FY2023–2024 as industrial destocking hit. 300mm capex cycle drove CapEx/D&A to 4.1× in FY2023. FCF margin compressed sharply to 7.7% but recovering. Inventory days at 231 — deliberately built.'
+  },
+  NXP: {
+    name: 'NXP Semiconductors', color: '#DAA520',
+    rev:       [8.612,11.063,13.205,13.276,12.614,12.269],
+    rev_yoy:   [null,28.46,19.36,0.54,-4.99,-2.74],
+    gm:        [49.18,54.84,56.93,56.89,56.44,54.74],
+    om:        [4.85,23.35,28.75,27.58,27.09,24.83],
+    ebitda_m:  [27.94,34.76,38.22,35.91,34.42,31.62],
+    rd_pct:    [20.03,17.5,16.27,18.21,18.61,19.24],
+    capex:     [0.392,0.767,1.063,0.827,0.727,0.397],
+    capex_pct: [4.55,6.93,8.05,6.23,5.76,3.24],
+    cap_intensity:[0.2,0.61,0.85,0.75,0.79,0.48],
+    fcf_m:     [24.27,20.88,21.45,20.23,16.29,19.75],
+    net_debt:  [5.334,7.742,7.32,6.313,7.062,7.705],
+    dso:       [32,30,27,25,30,31],
+    dpo:       [83,91,76,74,68,66],
+    dio:       [86,87,114,136,156,169],
+    insight: 'NXP OM jumped from 4.9% (FY2020, Freescale amortisation drag) to 28.8% (FY2022) as acquisition charges unwound. Gross margin remarkably stable at 54–57% throughout cycle. CapEx intensity very low (0.48× in FY2025) — VSMC/ESMC JV investments flow through equity, not CapEx. DPO at 66 days reflects NXP\'s leverage over its supply chain.'
+  },
+  IFX: {
+    name: 'Infineon Technologies', color: '#404040',
+    rev:       [9.77,13.07,14.95,17.65,16.19,16.55],
+    rev_yoy:   [null,33.83,14.36,18.06,-8.3,2.25],
+    gm:        [32.4,38.52,43.12,45.45,41.76,39.24],
+    om:        [6.78,13.29,20.01,24.21,14.64,10.33],
+    ebitda_m:  [21.49,26.97,31.71,34.96,27.11,23.41],
+    rd_pct:    [12.99,13.09,12.65,12.17,14.45,15.19],
+    capex:     [1.04,1.50,2.16,2.96,2.63,2.03],
+    capex_pct: [10.68,11.46,14.44,16.79,16.26,12.28],
+    cap_intensity:[0.73,0.84,1.23,1.56,1.3,0.94],
+    fcf_m:     [10.53,16.23,13.6,7.5,7.42,9.4],
+    net_debt:  [5.33,4.73,3.65,2.80,2.71,5.00],
+    dso:       [51,49,48,45,55,56],
+    dpo:       [73,84,102,113,83,82],
+    dio:       [129,117,139,163,167,170],
+    insight: 'IFX (EUR-reported, converted to USD). OM peak 24.2% in FY2023 followed by sharp compression to 10.3% in FY2025 driven by automotive destocking and Kulim/Dresden capex burden. FCF margin at 7.4–9.4% — negative FCF in absolute terms in recent quarters. Net debt rising again in FY2025 after Marvell Ethernet acquisition.'
+  },
+  STM: {
+    name: 'STMicroelectronics', color: '#E87878',
+    rev:       [10.219,12.761,16.128,17.286,13.269,11.8],
+    rev_yoy:   [null,24.88,26.39,7.18,-23.24,-11.07],
+    gm:        [37.08,41.74,47.34,47.94,39.34,33.89],
+    om:        [12.95,18.96,27.52,26.67,12.63,1.48],
+    ebitda_m:  [21.98,27.15,35.06,35.71,25.89,17.19],
+    rd_pct:    [15.15,13.5,11.79,12.15,15.65,17.32],
+    capex:     [1.279,1.828,3.528,4.111,2.647,1.844],
+    capex_pct: [12.52,14.32,21.88,23.78,19.95,15.63],
+    cap_intensity:[1.39,1.75,2.9,2.63,1.5,0.99],
+    fcf_m:     [7.97,9.65,10.38,10.88,2.4,2.61],
+    net_debt:  [-1.18,-0.829,-0.716,-0.512,-0.319,-1.002],
+    dso:       [52,50,45,37,48,54],
+    dpo:       [66,78,91,75,60,70],
+    dio:       [105,97,111,109,127,147],
+    insight: 'STM showed the sharpest cycle: revenue -31.7% from FY2023 peak, OM collapsed from 27.5% to 1.5%. Uniquely, STM carries net cash (negative net debt). FCF margin near zero in FY2024–2025. CapEx intensity peaked at 2.9× in FY2022 — manufacturing reshaping program underway. Highest leverage window of any supplier in the group.'
+  },
+  ADI: {
+    name: 'Analog Devices', color: '#6a1b9a',
+    rev:       [5.603,7.318,12.014,12.306,9.427,11.02],
+    rev_yoy:   [null,30.61,64.17,2.43,-23.4,16.9],
+    gm:        [65.86,61.83,62.69,64.01,57.08,61.46],
+    om:        [26.74,23.12,27.29,31.07,21.57,26.61],
+    ebitda_m:  [41.19,37.8,46.42,49.7,43.9,44.75],
+    rd_pct:    [18.76,17.71,14.16,13.49,15.78,16.03],
+    capex:     [0.166,0.344,0.699,1.261,0.73,0.534],
+    capex_pct: [2.96,4.7,5.82,10.25,7.74,4.85],
+    cap_intensity:[0.2,0.32,0.3,0.55,0.35,0.27],
+    fcf_m:     [32.89,32.67,31.44,28.9,33.12,38.82],
+    net_debt:  [4.089,4.275,5.078,4.944,4.643,5.646],
+    dso:       [48,73,55,44,52,48],
+    dpo:       [43,58,47,41,44,47],
+    dio:       [116,157,114,135,131,142],
+    insight: 'ADI (fiscal year ends Oct/Nov). Revenue doubled via Maxim acquisition (Aug 2021) — FY2022 +64% YoY reflects first full Maxim year. FCF margin exceptional at 38.8% in FY2025 — highest in group. CapEx/D&A 0.27× reflects fab-lite model: heavy Maxim amortisation in D&A, minimal own capex. Lowest negotiation leverage in the group.'
+  }
+};
+
+// ── COLOUR SHADES per supplier ───────────────────────────
+function shades(hex) {
+  // Returns [light/GM, mid/OM, dark/EBITDA] and alpha versions
+  const r = parseInt(hex.slice(1,3),16);
+  const g = parseInt(hex.slice(3,5),16);
+  const b = parseInt(hex.slice(5,7),16);
+  // lighter = mix with white; darker = reduce
+  const light = `rgb(${Math.min(255,r+40)},${Math.min(255,g+40)},${Math.min(255,b+40)})`;
+  const mid   = hex;
+  const dark  = `rgb(${Math.max(0,Math.round(r*0.65))},${Math.max(0,Math.round(g*0.65))},${Math.max(0,Math.round(b*0.65))})`;
+  const alpha = `rgba(${r},${g},${b},0.18)`;
+  return { light, mid, dark, alpha, r, g, b };
+}
+
+// ── CHART INSTANCES ──────────────────────────────────────
+const charts = {};
+
+function destroyAll() {
+  Object.values(charts).forEach(c => { if(c) c.destroy(); });
+}
+
+const defaultOpts = {
+  responsive: true, maintainAspectRatio: false,
+  animation: { duration: 400 },
+  plugins: { legend: { display: false }, tooltip: { titleFont: { family:'DM Mono', size:11 }, bodyFont: { family:'DM Sans', size:11 } } },
+  scales: {
+    x: { grid: { display: false }, ticks: { font: { family:'DM Mono', size:10 }, color:'#888' } },
+    y: { grid: { color:'#eee', lineWidth:1 }, ticks: { font: { family:'DM Mono', size:10 }, color:'#888' }, border: { display: false } }
+  }
+};
+
+function deepMerge(a, b) {
+  const r = Object.assign({}, a);
+  for (const k in b) {
+    if (b[k] && typeof b[k] === 'object' && !Array.isArray(b[k])) {
+      r[k] = deepMerge(a[k]||{}, b[k]);
+    } else { r[k] = b[k]; }
+  }
+  return r;
+}
+
+function pctFmt(v) { return v == null ? '' : v.toFixed(1)+'%'; }
+function bnFmt(v)  { return v == null ? '' : '$'+v.toFixed(2)+'B'; }
+function xFmt(v)   { return v == null ? '' : v.toFixed(2)+'×'; }
+function dFmt(v)   { return v == null ? '' : v+' days'; }
+
+let currentSupplier = 'TXN';
+
+function setSupplier(key, btn) {
+  currentSupplier = key;
+  document.querySelectorAll('.sup-tab').forEach(t => t.classList.remove('active'));
+  btn.classList.add('active');
+  const d = DATA[key];
+  const sh = shades(d.color);
+  // Style active tab
+  btn.style.background = d.color;
+  btn.style.color = '#fff';
+  btn.style.borderColor = d.color;
+  renderAll(key);
+}
+
+// Style inactive tabs on init
+function styleInactiveTabs() {
+  ['TXN','NXP','IFX','STM','ADI'].forEach(k => {
+    const tab = document.getElementById('tab-'+k);
+    if (!tab) return; // skip locked tabs
+    if (k === currentSupplier) {
+      tab.style.background = DATA[k].color;
+      tab.style.color = '#fff';
+      tab.style.borderColor = DATA[k].color;
+    } else {
+      tab.style.background = '';
+      tab.style.color = '';
+      tab.style.borderColor = '';
+    }
+  });
+}
+
+function renderAll(key) {
+  destroyAll();
+  styleInactiveTabs();
+  const d = DATA[key];
+  const sh = shades(d.color);
+  const key_ = key; // for annotations closure
+
+  // Insight bar
+  const ib = document.getElementById('insightBar');
+  ib.style.background = sh.alpha;
+  ib.style.borderColor = d.color;
+  ib.style.color = sh.dark;
+  ib.innerHTML = `<span class="insight-label" style="color:${d.color}">${d.name}</span>${d.insight}`;
+
+  // Legend dots
+  document.getElementById('l-rev-bar').style.background = d.color;
+  document.getElementById('l-gm').style.background = sh.light;
+  document.getElementById('l-om').style.background = sh.mid;
+  document.getElementById('l-rd').style.background = d.color;
+  document.getElementById('l-capex-bar').style.background = d.color;
+  document.getElementById('l-intensity').style.background = d.color;
+  document.getElementById('l-fcf').style.background = d.color;
+  document.getElementById('l-nd-bar').style.background = d.color;
+  document.getElementById('l-dso').style.background = d.color;
+  document.getElementById('l-dio').style.background = d.color;
+
+  // ─ 1. Revenue + YoY ─────────────────────────────────
+  charts['rev'] = new Chart(document.getElementById('c-rev'), {
+    type: 'bar',
+    data: {
+      labels: YEARS,
+      datasets: [
+        {
+          type: 'bar', label: 'Revenue ($B)', data: d.rev,
+          backgroundColor: `rgba(${sh.r},${sh.g},${sh.b},0.8)`,
+          borderRadius: 3, yAxisID: 'y'
+        },
+        {
+          type: 'line', label: 'YoY %', data: d.rev_yoy,
+          borderColor: '#666', pointBackgroundColor: '#666',
+          borderWidth: 1.5, pointRadius: 3, tension: 0.3, yAxisID: 'y2'
+        }
+      ]
+    },
+    options: deepMerge(defaultOpts, {
+      plugins: { tooltip: { callbacks: {
+        label: ctx => ctx.datasetIndex===0 ? bnFmt(ctx.raw) : (ctx.raw!=null?ctx.raw.toFixed(1)+'%':'')
+      }}},
+      scales: {
+        y: { ticks: { callback: v => '$'+v.toFixed(0)+'B' } },
+        y2: { position:'right', grid:{display:false}, ticks:{ callback: v=>v+'%', font:{family:'DM Mono',size:10}, color:'#888' } }
+      }
+    })
+  });
+
+  // ─ 2. Margins ───────────────────────────────────────
+  charts['margins'] = new Chart(document.getElementById('c-margins'), {
+    type: 'line',
+    data: {
+      labels: YEARS,
+      datasets: [
+        { label:'Gross Margin', data:d.gm, borderColor:sh.light, pointBackgroundColor:sh.light, borderWidth:2, tension:0.3, pointRadius:3 },
+        { label:'Op Margin',    data:d.om, borderColor:sh.mid,   pointBackgroundColor:sh.mid,   borderWidth:2, tension:0.3, pointRadius:3 },
+        { label:'EBITDA Margin',data:d.ebitda_m, borderColor:sh.dark, pointBackgroundColor:sh.dark, borderWidth:2, tension:0.3, pointRadius:3, borderDash:[4,3] }
+      ]
+    },
+    options: deepMerge(defaultOpts, {
+      plugins: { tooltip: { callbacks: { label: ctx => ctx.dataset.label+': '+pctFmt(ctx.raw) }}},
+      scales: { y: { ticks: { callback: v => v+'%' } } }
+    })
+  });
+
+  // ─ 3. R&D % ─────────────────────────────────────────
+  charts['rd'] = new Chart(document.getElementById('c-rd'), {
+    type: 'line',
+    data: { labels: YEARS, datasets: [{
+      data: d.rd_pct, borderColor: d.color, pointBackgroundColor: d.color,
+      borderWidth: 2, tension: 0.3, pointRadius: 4,
+      fill: true, backgroundColor: sh.alpha
+    }]},
+    options: deepMerge(defaultOpts, {
+      plugins: { tooltip: { callbacks: { label: ctx => 'R&D: '+pctFmt(ctx.raw) }}},
+      scales: { y: { ticks: { callback: v => v+'%' } } }
+    })
+  });
+
+  // ─ 4. CapEx combo ───────────────────────────────────
+  charts['capex'] = new Chart(document.getElementById('c-capex'), {
+    type: 'bar',
+    data: { labels: YEARS, datasets: [
+      { type:'bar', label:'CapEx ($B)', data:d.capex, backgroundColor:`rgba(${sh.r},${sh.g},${sh.b},0.75)`, borderRadius:3, yAxisID:'y' },
+      { type:'line', label:'CapEx %', data:d.capex_pct, borderColor:'#888', pointBackgroundColor:'#888', borderWidth:1.5, pointRadius:3, tension:0.3, yAxisID:'y2' }
+    ]},
+    options: deepMerge(defaultOpts, {
+      plugins: { tooltip: { callbacks: { label: ctx => ctx.datasetIndex===0 ? bnFmt(ctx.raw) : pctFmt(ctx.raw) }}},
+      scales: {
+        y: { ticks: { callback: v => '$'+v.toFixed(1)+'B' } },
+        y2: { position:'right', grid:{display:false}, ticks:{ callback:v=>v+'%', font:{family:'DM Mono',size:10}, color:'#888' } }
+      }
+    })
+  });
+
+  // ─ 5. Capital intensity ─────────────────────────────
+  charts['intensity'] = new Chart(document.getElementById('c-intensity'), {
+    type: 'line',
+    data: { labels: YEARS, datasets: [{
+      data: d.cap_intensity, borderColor: d.color, pointBackgroundColor: d.color,
+      borderWidth: 2, tension: 0.3, pointRadius: 4,
+      fill: true, backgroundColor: sh.alpha
+    }]},
+    options: deepMerge(defaultOpts, {
+      plugins: { tooltip: { callbacks: { label: ctx => 'Cap Intensity: '+xFmt(ctx.raw) }}},
+      scales: { y: { ticks: { callback: v => Number.isInteger(v) ? v+'×' : v.toFixed(2)+'×' }, suggestedMin: 0 } }
+    })
+  });
+
+  // ─ 6. FCF margin ────────────────────────────────────
+  charts['fcf'] = new Chart(document.getElementById('c-fcf'), {
+    type: 'line',
+    data: { labels: YEARS, datasets: [{
+      data: d.fcf_m, borderColor: d.color, pointBackgroundColor: d.color,
+      borderWidth: 2, tension: 0.3, pointRadius: 4,
+      fill: true, backgroundColor: sh.alpha
+    }]},
+    options: deepMerge(defaultOpts, {
+      plugins: { tooltip: { callbacks: { label: ctx => 'FCF Margin: '+pctFmt(ctx.raw) }}},
+      scales: { y: { ticks: { callback: v => v+'%' } } }
+    })
+  });
+
+  // ─ 7. Net debt ──────────────────────────────────────
+  const ndColors = d.net_debt.map(v => v < 0
+    ? `rgba(${sh.r},${sh.g},${sh.b},0.4)`
+    : `rgba(${sh.r},${sh.g},${sh.b},0.8)`
+  );
+  charts['netdebt'] = new Chart(document.getElementById('c-netdebt'), {
+    type: 'bar',
+    data: { labels: YEARS, datasets: [{
+      data: d.net_debt, backgroundColor: ndColors, borderRadius: 3
+    }]},
+    options: deepMerge(defaultOpts, {
+      plugins: { tooltip: { callbacks: { label: ctx => 'Net Debt: '+bnFmt(ctx.raw) }}},
+      scales: { y: { ticks: { callback: v => '$'+v.toFixed(1)+'B' } } }
+    })
+  });
+
+  // ─ 8. DSO / DPO ─────────────────────────────────────
+  charts['dsodpo'] = new Chart(document.getElementById('c-dsodpo'), {
+    type: 'line',
+    data: { labels: YEARS, datasets: [
+      { label:'DSO', data:d.dso, borderColor:sh.mid, pointBackgroundColor:sh.mid, borderWidth:2, tension:0.3, pointRadius:3 },
+      { label:'DPO', data:d.dpo, borderColor:sh.dark, pointBackgroundColor:sh.dark, borderWidth:2, tension:0.3, pointRadius:3, borderDash:[4,3] }
+    ]},
+    options: deepMerge(defaultOpts, {
+      plugins: { tooltip: { callbacks: { label: ctx => ctx.dataset.label+': '+dFmt(ctx.raw) }}},
+      scales: { y: { ticks: { callback: v => v+' d' } } }
+    })
+  });
+
+  // Update DPO legend line
+  document.getElementById('l-dpo').style.borderTop = `2px dashed ${sh.dark}`;
+  document.getElementById('l-dpo').style.background = 'transparent';
+
+  // ─ 9. DIO ───────────────────────────────────────────
+  charts['dio'] = new Chart(document.getElementById('c-dio'), {
+    type: 'line',
+    data: { labels: YEARS, datasets: [{
+      data: d.dio, borderColor: d.color, pointBackgroundColor: d.color,
+      borderWidth: 2, tension: 0.3, pointRadius: 4,
+      fill: true, backgroundColor: sh.alpha
+    }]},
+    options: deepMerge(defaultOpts, {
+      plugins: { tooltip: { callbacks: { label: ctx => 'DIO: '+dFmt(ctx.raw) }}},
+      scales: { y: { ticks: { callback: v => v+' d' } } }
+    })
+  });
+
+  // EBITDA legend dashed line update
+  const ebitdaLeg = document.getElementById('l-ebitda');
+  ebitdaLeg.style.borderTop = `2px dashed ${sh.dark}`;
+  ebitdaLeg.style.background = 'transparent';
+  ebitdaLeg.style.height = '0';
+  ebitdaLeg.style.display = 'block';
+  ebitdaLeg.style.width = '16px';
+
+  // ─ FIXED COST CHARTS ────────────────────────────────
+  const fc = FC_DATA[key];
+
+  // Update legend colours
+  document.getElementById('l-dep-rev').style.background = d.color;
+  document.getElementById('l-dep-cogs').style.background = d.color;
+  document.getElementById('l-gp-comp').style.background = d.color;
+  // GP compression legend swatches
+  if(document.getElementById('l-gp-hi'))  document.getElementById('l-gp-hi').style.background = d.color;
+  if(document.getElementById('l-gp-md'))  { document.getElementById('l-gp-md').style.background = d.color; document.getElementById('l-gp-md').style.opacity='0.55'; }
+  if(document.getElementById('l-ol-hi'))  document.getElementById('l-ol-hi').style.background = d.color;
+  if(document.getElementById('l-ol-md'))  { document.getElementById('l-ol-md').style.background = d.color; document.getElementById('l-ol-md').style.opacity='0.55'; }
+
+  // 10. PP&E Dep / Revenue
+  charts['dep-rev'] = new Chart(document.getElementById('c-dep-rev'), {
+    type: 'line',
+    data: { labels: YEARS, datasets: [{ data: fc.dep_rev, borderColor: d.color, pointBackgroundColor: d.color, borderWidth: 2, tension: 0.3, pointRadius: 4, fill: true, backgroundColor: sh.alpha }]},
+    options: deepMerge(defaultOpts, {
+      plugins: { tooltip: { callbacks: { label: ctx => 'Dep/Rev: '+pctFmt(ctx.raw) }}},
+      scales: { y: { ticks: { callback: v => v+'%' }, suggestedMin: 0 } }
+    })
+  });
+
+  // 11. PP&E Dep / COGS
+  charts['dep-cogs'] = new Chart(document.getElementById('c-dep-cogs'), {
+    type: 'line',
+    data: { labels: YEARS, datasets: [{ data: fc.dep_cogs, borderColor: d.color, pointBackgroundColor: d.color, borderWidth: 2, tension: 0.3, pointRadius: 4, fill: true, backgroundColor: sh.alpha }]},
+    options: deepMerge(defaultOpts, {
+      plugins: { tooltip: { callbacks: { label: ctx => 'Dep/COGS: '+pctFmt(ctx.raw) }}},
+      scales: { y: { ticks: { callback: v => v+'%' }, suggestedMin: 0 } }
+    })
+  });
+
+  // 12. GM Sensitivity (signed: positive = expanding, negative = compressing)
+  const gpColors = fc.gm_sens.map(v => v === null ? 'transparent'
+    : v > 0 ? 'rgba(74,222,128,0.75)'   // green = expanding
+    : v > -0.3 ? 'rgba(251,146,60,0.75)' // amber = mild compression
+    : 'rgba(248,113,113,0.85)'           // red = significant compression
+  );
+  charts['gp-comp'] = new Chart(document.getElementById('c-gp-comp'), {
+    type: 'bar',
+    data: { labels: YEARS, datasets: [{ data: fc.gm_sens, backgroundColor: gpColors, borderRadius: 3 }]},
+    options: deepMerge(defaultOpts, {
+      plugins: { tooltip: { callbacks: { label: ctx => {
+        if (ctx.raw == null) return 'n/a';
+        const dir = ctx.raw > 0 ? '▲ GM expanding' : '▼ GM compressing';
+        return dir + ': ' + Math.abs(ctx.raw).toFixed(3) + ' pp per 1% rev';
+      }}}},
+      scales: { y: {
+        ticks: { callback: v => v.toFixed(2) },
+        grid: { color: '#eee', lineWidth: 1 }
+      }}
+    })
+  });
+
+  // 13. Annotations table
+  const annEl = document.getElementById('gm-annotations');
+  if (annEl) {
+    const anns = GM_ANNOTATIONS[key] || [];
+    const rows = anns.map(a => {
+      const v = a.val;
+      const vStr = v === null ? '—' : (v >= 0 ? '+' : '') + v.toFixed(3);
+      const vCol = v === null ? '#888' : v > 0 ? '#16a34a' : v > -0.3 ? '#d97706' : '#dc2626';
+      return `<div style="display:flex;gap:8px;padding:5px 0;border-bottom:1px solid #f0f0f0;align-items:flex-start;">
+        <div style="font-family:DM Mono,monospace;font-size:9px;color:#8b90a7;width:36px;flex-shrink:0;padding-top:1px">${a.yr}</div>
+        <div style="font-family:DM Mono,monospace;font-size:10px;font-weight:600;color:${vCol};width:44px;flex-shrink:0">${vStr}</div>
+        <div style="font-size:10px;color:#2d3142;line-height:1.4">${a.note}</div>
+      </div>`;
+    }).join('');
+    annEl.innerHTML = rows || '<div style="font-size:11px;color:#8b90a7;padding:8px 0">No annotations for this supplier.</div>';
+  }
+}
+
+
+// ── GM SENSITIVITY ANNOTATIONS ───────────────────────────────────────────────
+const GM_ANNOTATIONS = {
+  TXN: [
+    { yr:'FY2020', val:null,   note:'Base year — no prior year to calculate sensitivity.' },
+    { yr:'FY2021', val:0.126,  note:'Revenue +26.9%, GM expanded +3.4pp. Volume absorption benefits flowing through. 300mm ramp beginning.' },
+    { yr:'FY2022', val:0.141,  note:'Continued GM expansion on +9.2% growth — approaching GM peak of 68.8%.' },
+    { yr:'FY2023', val:-0.468, note:'Revenue fell -12.5%, GM compressed -5.9pp. 300mm depreciation accelerating into a declining revenue base. Dep/COGS rose to 18%.' },
+    { yr:'FY2024', val:-0.444, note:'Revenue fell further -10.7%, GM compressed -4.8pp. Dep/COGS hit 23% — depreciation growing faster than revenue recovery could offset.' },
+    { yr:'FY2025', val:-0.086, note:'Revenue recovered +13.1% but GM barely moved (-1.1pp). Dep/COGS at 25.2% — highest in group — absorbed most of the volume benefit. Near-zero sensitivity in an expansion year confirms ongoing structural cost pressure.' },
+  ],
+  NXP: [
+    { yr:'FY2020', val:null,   note:'Base year — no prior year to calculate sensitivity.' },
+    { yr:'FY2021', val:0.199,  note:'Revenue +28.5%, GM expanded +5.7pp. Freescale amortisation unwinding boosted OM but GM sensitivity reflects genuine expansion.' },
+    { yr:'FY2022', val:0.108,  note:'GM continued expanding on +19.4% growth — GM reaching 56.9%, remarkably stable for rest of cycle.' },
+    { yr:'FY2023', val:-0.074, note:'Near-flat revenue (+0.5%) — tiny GM movement (-0.04pp). Ratio is mathematically valid but economically immaterial. NXP pricing held.' },
+    { yr:'FY2024', val:-0.090, note:'Revenue -5.0% but GM barely compressed (-0.5pp). Volume story — pricing held. Lost less gross profit ($433M) than revenue ($662M). Suggests customers bought less, not cheaper.' },
+    { yr:'FY2025', val:-0.622, note:'Revenue -2.7% but GM compressed -1.7pp — lost more gross profit ($403M) than revenue ($345M). Pricing or mix story: concessions being made on retained customers. Watch for further deterioration. Cost rigidity is R&D (~$2.36B, flat in absolute terms), not depreciation (CapEx intensity low at 0.48×).' },
+  ],
+  IFX: [
+    { yr:'FY2020', val:null,   note:'Base year — no prior year to calculate sensitivity.' },
+    { yr:'FY2021', val:0.181,  note:'Revenue +33.8%, GM expanded +6.1pp — strong volume leverage. CapEx intensity still modest (0.84×); depreciation burden not yet elevated.' },
+    { yr:'FY2022', val:0.320,  note:'GM expanded +4.6pp on +14.4% growth. Kulim and Dresden CapEx spending began (intensity 1.23×) but assets not yet online — depreciation burden still fell slightly.' },
+    { yr:'FY2023', val:0.129,  note:'Revenue +18.1%, GM expanded +2.3pp — positive sensitivity. Looks low vs prior years but reflects a large +18% denominator, not cost structure change. Peak CapEx intensity (1.56×) reflects spending, not yet depreciation. Assets being built.' },
+    { yr:'FY2024', val:-0.446, note:'Revenue -8.3%, GM compressed -3.7pp. First year of full Kulim depreciation impact — Dep/Rev jumped from 7.9% to 9.7%. The FY2022-23 CapEx spending now hitting the P&L.' },
+    { yr:'FY2025', val:-1.133, note:'Revenue grew +2.3% but GM compressed -2.5pp. Most severe reading — effective OL deeply negative. Kulim/Dresden depreciation (Dep/Rev 10.3%) overwhelming volume recovery. Negative GM sensitivity in a growth year is unusual and signals structural cost pressure that volume alone cannot cure.' },
+  ],
+  STM: [
+    { yr:'FY2020', val:null,   note:'Base year — no prior year to calculate sensitivity.' },
+    { yr:'FY2021', val:0.187,  note:'Revenue +24.9%, GM expanded +4.7pp. Favourable volume leverage before peak CapEx cycle.' },
+    { yr:'FY2022', val:0.212,  note:'Revenue +26.4%, GM expanded +5.6pp — approaching peak GM of 47.9%. CapEx intensity peaking (2.9×).' },
+    { yr:'FY2023', val:0.084,  note:'Revenue +7.2%, GM barely expanded +0.6pp. Low positive sensitivity — early signs of margin pressure even in a growth year. CapEx still elevated (2.6×), depreciation rising.' },
+    { yr:'FY2024', val:-0.370, note:'Revenue -23.2% (steepest decline in group), GM compressed -8.6pp — sharpest absolute GM fall. Dep/COGS hit 20.6%. High fixed cost absorption in a sharp volume decline.' },
+    { yr:'FY2025', val:-0.492, note:'Revenue -11.1%, GM compressed further to 33.9%. CFO guided Q1 2026 at 33.7% as "lowest point of the year" with recovery expected. Dep/COGS at 22.5% — second highest in group after TI. High sensitivity confirms significant manufacturing fixed cost burden. Strongest negotiation leverage window in the group.' },
+  ],
+  ADI: [
+    { yr:'FY2020', val:null,   note:'Base year — no prior year to calculate sensitivity.' },
+    { yr:'FY2021', val:-0.132, note:'Revenue grew +30.6% but GM fell -4.0pp — Maxim acquisition dilution. Maxim\'s lower-margin product mix pulled consolidated GM down. Not a structural deterioration — a one-time M&A effect.' },
+    { yr:'FY2022', val:0.013,  note:'First full year post-Maxim (+64% revenue YoY). Near-zero sensitivity reflects integration complexity — revenue scaled massively but margins flat. Maxim amortisation ($2.3B/yr) heavily loaded D&A.' },
+    { yr:'FY2023', val:0.543,  note:'Revenue +2.4%, GM expanded +1.3pp — unusually high positive sensitivity on modest growth. Maxim integration synergies flowing through. Amortisation stable; incremental revenue at high margin.' },
+    { yr:'FY2024', val:-0.296, note:'Revenue -23.4% (destocking cycle), GM compressed -6.9pp. Significant but contained. Fab-lite model means no heavy depreciation in COGS — the compression is volume-driven, not fixed-cost-driven.' },
+    { yr:'FY2025', val:0.259,  note:'Revenue recovered +16.9%, GM expanded +4.4pp — positive sensitivity in recovery. Fab-lite advantage confirmed: without heavy depreciation in COGS, GM recovers quickly with volume. Contrast with IFX (-1.13) and STM (-0.49) where depreciation burdens suppress margin recovery even as revenue grows.' },
+  ],
+};
+
+// Init
+renderAll('IFX');
+</script>
+</body>
+</html>

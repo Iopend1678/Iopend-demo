@@ -1,0 +1,740 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ABC Semiconductor — Negotiation Leverage Scorecard (Sample)</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --ink:#0f1117; --ink-2:#2d3142; --ink-3:#5c6078; --ink-4:#8b90a7;
+    --rule:#e2e4ea; --surface:#f7f8fc; --white:#ffffff;
+    --ti:#00D4C8; --nxp:#DAA520; --ifx:#404040; --stm:#E87878; --adi:#6a1b9a;
+    --confirmed:#22c55e; --analysis:#6b8cda; --assumption:#aaa;
+    --font:'DM Sans',sans-serif; --mono:'DM Mono',monospace;
+  }
+  *{box-sizing:border-box;margin:0;padding:0;}
+  body{font-family:var(--font);background:var(--white);color:var(--ink);font-size:13px;line-height:1.5;}
+
+  nav{background:var(--ink);padding:0 28px;display:flex;align-items:center;height:48px;position:sticky;top:0;z-index:100;}
+  .nav-logo{color:#fff;font-size:13px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;margin-right:36px;white-space:nowrap;}
+  .nav-logo span{color:#DAA520;}
+  .nav-tabs{display:flex;height:100%;}
+  .nav-tab{color:rgba(255,255,255,.5);font-size:12px;font-weight:500;padding:0 18px;display:flex;align-items:center;cursor:pointer;border-bottom:2px solid transparent;text-decoration:none;white-space:nowrap;transition:all .15s;}
+  .nav-tab:hover{color:rgba(255,255,255,.85);}
+  .nav-tab.active{color:#fff;border-bottom-color:#DAA520;}
+  .nav-right{margin-left:auto;color:rgba(255,255,255,.4);font-size:11px;font-family:var(--mono);}
+
+  .page-header{background:var(--white);border-bottom:1px solid var(--rule);padding:18px 28px 14px;display:flex;align-items:flex-start;justify-content:space-between;gap:20px;}
+  .page-title{font-size:18px;font-weight:600;}
+  .page-sub{font-size:12px;color:var(--ink-3);margin-top:3px;}
+
+  /* Supplier tabs */
+  .sup-tab-bar{display:flex;gap:0;background:var(--white);border-bottom:2px solid var(--rule);padding:0 28px;}
+  .sup-tab{padding:12px 20px;font-size:12px;font-weight:600;cursor:pointer;border-bottom:3px solid transparent;margin-bottom:-2px;transition:all .15s;font-family:var(--mono);color:var(--ink-3);}
+  .sup-tab:hover{color:var(--ink);}
+  .sup-tab.active{color:var(--ink);border-bottom-color:var(--current-color);}
+  .sup-tab .score-badge{font-size:11px;padding:1px 7px;border-radius:10px;margin-left:8px;font-weight:700;}
+
+  .scorecard{display:none;padding:20px 28px;}
+  .scorecard.active{display:block;}
+
+  .main-wrap{max-width:1200px;}
+
+  /* Source legend */
+  .source-legend{display:flex;gap:16px;flex-wrap:wrap;padding:10px 14px;background:var(--surface);border:1px solid var(--rule);border-radius:6px;margin-bottom:18px;}
+  .sl-item{display:flex;align-items:center;gap:6px;font-size:11px;color:var(--ink-2);}
+  .sl-swatch{width:10px;height:14px;border-radius:2px;border-left:2px solid;}
+  .sl-c{background:transparent;border-color:var(--confirmed);}
+  .sl-a{background:transparent;border-color:var(--analysis);}
+  .sl-w{background:transparent;border-color:var(--assumption);}
+
+  /* Hero strip */
+  .hero-strip{display:grid;grid-template-columns:auto 1fr auto;gap:24px;align-items:center;padding:18px 22px;background:var(--white);border:1.5px solid var(--rule);border-radius:10px;margin-bottom:18px;}
+  .hero-score-num{font-size:44px;font-weight:600;line-height:1;font-family:var(--mono);}
+  .hero-score-denom{font-size:13px;color:var(--ink-4);font-family:var(--mono);}
+  .hero-score-label{font-size:10px;text-transform:uppercase;letter-spacing:.08em;color:var(--ink-3);margin-top:4px;}
+  .score-bar-track{height:5px;background:#eee;border-radius:3px;overflow:hidden;margin-top:8px;}
+  .score-bar-fill{height:100%;border-radius:3px;}
+  .hero-verdict{font-size:15px;font-weight:600;color:var(--ink);margin-bottom:5px;}
+  .hero-body{font-size:12px;color:var(--ink-2);line-height:1.7;max-width:640px;}
+  .hero-meta{display:flex;flex-direction:column;gap:8px;min-width:140px;align-items:flex-end;}
+  .meta-label{font-size:10px;text-transform:uppercase;letter-spacing:.06em;color:var(--ink-4);}
+  .meta-val{font-size:13px;font-weight:600;font-family:var(--mono);color:var(--ink);}
+
+  /* Ranking strip */
+  .rank-strip{display:flex;gap:8px;margin-bottom:18px;}
+  .rank-card{flex:1;min-width:90px;padding:9px 12px;border-radius:8px;border:1.5px solid var(--rule);background:var(--white);text-align:center;}
+  .rank-card.current{border-color:var(--current-color,#888);}
+  .rank-num{font-size:11px;color:var(--ink-4);font-family:var(--mono);margin-bottom:2px;}
+  .rank-name{font-size:12px;font-weight:600;color:var(--ink);}
+  .rank-score{font-size:16px;font-weight:600;font-family:var(--mono);margin-top:2px;}
+  .rank-tag{font-size:9px;margin-top:3px;text-transform:uppercase;letter-spacing:.04em;color:var(--ink-4);}
+
+  /* Window bar */
+  .window-bar{display:flex;background:var(--surface);border:1px solid var(--rule);border-radius:8px;overflow:hidden;margin-bottom:18px;}
+  .window-seg{flex:1;padding:9px 13px;border-right:1px solid var(--rule);}
+  .window-seg:last-child{border-right:none;}
+  .window-seg.active{background:#fef9f0;}
+  .window-seg-label{font-weight:600;color:var(--ink-3);font-size:10px;text-transform:uppercase;letter-spacing:.05em;}
+  .window-seg-val{font-size:11px;color:var(--ink-2);margin-top:2px;}
+  .window-seg.active .window-seg-label{color:var(--current-color,#888);}
+  .window-seg.active .window-seg-val{color:var(--ink);font-weight:500;}
+
+  /* Section title */
+  .sec-title{font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.07em;color:var(--ink-3);margin:0 0 12px;display:flex;align-items:center;gap:10px;}
+  .sec-title::after{content:'';flex:1;height:1px;background:var(--rule);}
+
+  /* Dimension grid */
+  .dim-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;margin-bottom:20px;}
+  .dim-card{background:var(--white);border:1px solid var(--rule);border-radius:8px;overflow:hidden;}
+  .dim-card-head{padding:9px 13px 7px;display:flex;align-items:flex-start;justify-content:space-between;border-bottom:1px solid var(--rule);}
+  .dim-label{font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.06em;color:var(--ink-3);}
+  .dim-name{font-size:12px;font-weight:600;color:var(--ink);margin-top:1px;}
+  .dim-weight{font-size:10px;font-family:var(--mono);color:var(--ink-4);background:var(--surface);padding:2px 7px;border-radius:10px;white-space:nowrap;}
+  .dim-body{padding:11px 13px;}
+  .dim-score-row{display:flex;align-items:center;gap:10px;margin-bottom:9px;}
+  .dim-score-big{font-size:26px;font-weight:600;font-family:var(--mono);line-height:1;}
+  .dim-score-of{font-size:12px;color:var(--ink-4);font-family:var(--mono);margin-top:3px;}
+  .dim-wtd{font-size:11px;color:var(--ink-3);font-family:var(--mono);}
+  .dim-wtd span{font-weight:600;color:var(--ink);}
+  .dim-narrative{font-size:11px;color:var(--ink-2);line-height:1.6;margin-bottom:9px;}
+  .evidence-chips{display:flex;flex-direction:column;gap:4px;}
+  .chip{display:flex;align-items:flex-start;gap:7px;padding:5px 8px;border-radius:5px;font-size:10.5px;line-height:1.5;}
+  .chip-c{background:transparent;color:var(--ink-2);border-left:2px solid var(--confirmed);}
+  .chip-a{background:transparent;color:var(--ink-2);border-left:2px solid var(--analysis);}
+  .chip-w{background:transparent;color:var(--ink-3);border-left:2px solid var(--assumption);}
+  .chip-se{background:transparent;color:var(--ink-2);border-left:2px solid #e8a020;}
+  .chip-icon{font-size:11px;flex-shrink:0;margin-top:1px;}
+  .chip-text strong{font-weight:600;display:block;margin-bottom:1px;}
+
+  /* Action pill */
+  .action-pill{font-size:11px;font-weight:700;padding:5px 14px;border-radius:20px;letter-spacing:.04em;font-family:var(--mono);display:inline-block;}
+  .act-now{background:#fef2f2;color:#b91c1c;border:1.5px solid #fecaca;}
+  .act-monitor{background:#fffbeb;color:#92400e;border:1.5px solid #fde68a;}
+  .act-negotiate{background:#f0f4ff;color:#1e40af;border:1.5px solid #bfdbfe;}
+  .act-hold{background:#f0fdf4;color:#166534;border:1.5px solid #86efac;}
+
+  /* Playbook */
+  .playbook{background:var(--white);border:1.5px solid var(--rule);border-radius:8px;padding:16px 18px;margin-bottom:18px;}
+  .playbook-title{font-size:12px;font-weight:600;text-transform:uppercase;letter-spacing:.06em;color:var(--ink);margin-bottom:11px;display:flex;align-items:center;gap:8px;}
+  .playbook-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:13px;}
+  .play-label{font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.06em;margin-bottom:4px;}
+  .play-text{font-size:11px;color:var(--ink-2);line-height:1.6;}
+
+  .footer-note{font-size:10px;color:var(--ink-4);line-height:1.6;padding-top:14px;border-top:1px solid var(--rule);}
+  .tab-locked-sc {
+    padding: 10px 16px;
+    border-radius: 8px;
+    font-size: 11px;
+    font-family: 'DM Mono', monospace;
+    color: var(--ink-3);
+    border: 1px dashed rgba(255,255,255,0.1);
+    cursor: not-allowed;
+    opacity: 0.45;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    white-space: nowrap;
+  }
+</style>
+</head>
+<body>
+<div style="background:rgba(201,168,76,0.1);border-bottom:1px solid rgba(201,168,76,0.2);padding:8px 24px;font-family:'DM Mono',monospace;font-size:10px;color:#c9a84c;text-align:center;letter-spacing:0.06em;">SAMPLE VIEW — STM &amp; IFX shown · Full 5-supplier scorecard available on request · <a href="iopenspend_pitch.html" style="color:#c9a84c;text-decoration:underline;">Learn more</a></div>
+
+<nav>
+  <div class="nav-logo">ABC <span>Semi</span> · Procurement Intelligence</div>
+  <div class="nav-tabs">
+    <a class="nav-tab" href="#">Spend Distribution</a>
+    <a class="nav-tab active" href="#">Negotiation Leverage</a>
+    <a class="nav-tab" href="#">Financial Analytics</a>
+    <a class="nav-tab" href="#">Fab Footprint</a>
+    <a class="nav-tab" href="#">China Competition</a>
+  </div>
+  <div class="nav-right">Q4-25 Intelligence · Updated Mar 2026</div>
+</nav>
+
+<div class="page-header">
+  <div>
+    <div class="page-title">Negotiation Leverage Scorecard</div>
+    <div class="page-sub">PMIC / LDO / Gate Driver — 6-dimension weighted scoring · All suppliers</div>
+  </div>
+</div>
+
+<!-- SUPPLIER TAB BAR -->
+<div class="sup-tab-bar">
+  <div class="sup-tab" onclick="showSupplier('STM',this)" style="--current-color:var(--stm)">
+    STM <span class="score-badge" style="background:#fdf0f0;color:var(--stm)">4.55</span>
+  </div>
+  <div class="sup-tab active" onclick="showSupplier('IFX',this)" style="--current-color:var(--ifx)">
+    IFX <span class="score-badge" style="background:#f0f0f0;color:var(--ifx)">3.55</span>
+  </div>
+  <div class="sup-tab" onclick="showSupplier('TXN',this)" style="--current-color:var(--ti)">
+    TXN <span class="score-badge" style="background:#e6fffe;color:var(--ti)">3.30</span>
+  </div>
+  <div class="sup-tab" onclick="showSupplier('NXP',this)" style="--current-color:var(--nxp)">
+    NXP <span class="score-badge" style="background:#fffaeb;color:var(--nxp)">1.85</span>
+  </div>
+  <div class="sup-tab" onclick="showSupplier('ADI',this)" style="--current-color:var(--adi)">
+    ADI <span class="score-badge" style="background:#f5f0ff;color:var(--adi)">1.75</span>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════ -->
+<!-- STM SCORECARD                                       -->
+<!-- ═══════════════════════════════════════════════════ -->
+<div class="scorecard active" id="sc-STM">
+<div class="main-wrap">
+
+  <div class="source-legend">
+    <div class="sl-item"><div class="sl-swatch sl-c"></div><strong>Confirmed</strong> — 10-K or verbatim transcript</div>
+    <div class="sl-item"><div class="sl-swatch sl-a"></div><strong>Analysis</strong> — calculated from confirmed data</div>
+    <div class="sl-item"><div class="sl-swatch sl-w"></div><strong>Working assumption</strong> — inference, not directly sourced</div>
+  </div>
+
+  <div class="hero-strip">
+    <div class="hero-score-block">
+      <div class="hero-score-num">4.55</div>
+      <div class="hero-score-denom">/5.00</div>
+      <div class="hero-score-label">Leverage Index</div>
+      <div style="margin-top:10px">
+        <div class="score-bar-track" style="width:80px;margin:0 auto">
+          <div class="score-bar-fill" style="width:91%;background:var(--stm)"></div>
+        </div>
+      </div>
+    </div>
+    <div class="hero-summary">
+      <div class="hero-verdict">#1 of 5 suppliers — Highest leverage window in the portfolio</div>
+      <div class="hero-body">
+        STM is experiencing its deepest financial distress cycle since the Freescale era. Revenue has collapsed 31.7% from its FY2023 peak, operating income fell from $4.6B to $175M, and Power &amp; Discrete — the segment containing PMIC and LDO — posted a <strong>–30.2% operating margin in Q4 2025</strong>. That segment is structurally loss-making and needs volume. Source Engine Q4-25 confirms STM as the only PMIC/LDO supplier showing a <strong>price-down signal</strong>. Inventory correction ends Q2 2026 per CEO guidance — after which fixed cost absorption improves and leverage narrows. The negotiation window is now.
+      </div>
+    </div>
+    <div class="hero-meta">
+      <div class="meta-item">
+        <div class="meta-label">Last Updated</div>
+        <div class="meta-val">Mar 2026</div>
+      </div>
+      <div class="meta-item">
+        <div class="meta-label">Sources</div>
+        <div class="meta-val" style="font-size:11px;color:var(--ink-3)">10-K · Q4 Call<br>Source Engine Q4-25</div>
+      </div>
+      <div class="meta-item">
+        <div class="meta-label">Score Trend</div>
+        <div class="meta-val" style="color:var(--stm)">↑ +0.20 vs prior</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="rank-strip">
+    <div class="rank-card current">
+      <div class="rank-num">#1</div>
+      <div class="rank-name">STM</div>
+      <div class="rank-score" style="color:var(--stm)">4.55</div>
+      <div class="rank-tag">Current supplier</div>
+    </div>
+    <div class="rank-card">
+      <div class="rank-num">#2</div>
+      <div class="rank-name">IFX</div>
+      <div class="rank-score" style="color:#404040">3.55</div>
+      <div class="rank-tag">High leverage</div>
+    </div>
+    <div class="rank-card">
+      <div class="rank-num">#3</div>
+      <div class="rank-name">TXN</div>
+      <div class="rank-score" style="color:#00D4C8">3.30</div>
+      <div class="rank-tag">Window closing</div>
+    </div>
+    <div class="rank-card">
+      <div class="rank-num">#4</div>
+      <div class="rank-name">ADI</div>
+      <div class="rank-score" style="color:#6a1b9a">1.75</div>
+      <div class="rank-tag">Low leverage</div>
+    </div>
+    <div class="rank-card">
+      <div class="rank-num">#5</div>
+      <div class="rank-name">NXP</div>
+      <div class="rank-score" style="color:#DAA520">1.75</div>
+      <div class="rank-tag">Recovering</div>
+    </div>
+  </div>
+
+  <div class="window-bar">
+    <div class="window-seg active">
+      <div class="window-seg-label">● Now (Q1-Q2 2026)</div>
+      <div class="window-seg-val">Maximum leverage · inventory correction ongoing · P&amp;D at –30% margin</div>
+    </div>
+    <div class="window-seg">
+      <div class="window-seg-label">Q3 2026</div>
+      <div class="window-seg-val">Leverage declining · inventory normalises · STM gross margin recovering</div>
+    </div>
+    <div class="window-seg">
+      <div class="window-seg-label">H2 2026 Onwards</div>
+      <div class="window-seg-val">Window closing · CloudOpt IC and LEO satellite revenue offset PMIC pressure</div>
+    </div>
+  </div>
+
+  <div class="sec-title">Six-Dimension Weighted Scoring</div>
+  <div class="source-legend">
+    <div class="sl-item">
+      <div class="sl-swatch sl-c"></div>
+      <strong>Confirmed</strong> — directly from 10-K filing or verbatim transcript quote
+    </div>
+    <div class="sl-item">
+      <div class="sl-swatch sl-a"></div>
+      <strong>Analysis</strong> — calculated or derived from confirmed data
+    </div>
+    <div class="sl-item">
+      <div class="sl-swatch sl-w"></div>
+      <strong>Working assumption</strong> — inference or judgement, not directly sourced
+    </div>
+  </div>
+
+  <div class="dim-grid">
+
+    <!-- D1 Revenue Cycle Pressure -->
+    <div class="dim-card">
+      <div class="dim-card-head">
+        <div>
+          <div class="dim-label">D1 · Revenue Cycle Pressure</div>
+          <div class="dim-name">Cyclical Revenue Distress</div>
+        </div>
+        <div class="dim-weight">Weight 15%</div>
+      </div>
+      <div class="dim-body">
+        <div class="dim-score-row">
+          <div>
+            <div class="dim-score-big" style="color:var(--stm)">5<span style="font-size:16px;color:var(--ink-4)">/5</span></div>
+          </div>
+          <div>
+            <div class="dim-wtd">Weighted: <span>0.75</span></div>
+            <div class="score-bar-track" style="width:100px;margin-top:5px">
+              <div class="score-bar-fill" style="width:100%;background:var(--stm)"></div>
+            </div>
+          </div>
+        </div>
+        <div class="dim-narrative">Revenue declined 31.7% from FY2023 peak — the sharpest contraction of any supplier in the group. Two consecutive years of double-digit decline. Industrial and automotive corrections both hit simultaneously.</div>
+        <div class="evidence-chips">
+          <div class="chip chip-c">
+            <div class="chip-icon">✅</div>
+            <div class="chip-text"><strong>Confirmed · 10-K FY2025</strong>FY2023 revenue $17.3B → FY2025 $11.8B = –31.7% from peak. Full-year 2025 down 11.1% YoY per STM 20-F filing.</div>
+          </div>
+          <div class="chip chip-c">
+            <div class="chip-icon">✅</div>
+            <div class="chip-text"><strong>Confirmed · Q4 2025 Call · CEO Chery</strong>"H2 typically 15% above H1 seasonality." Sequential recovery beginning but from compressed base.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- D2 GM Compression -->
+    <div class="dim-card">
+      <div class="dim-card-head">
+        <div>
+          <div class="dim-label">D2 · Margin Compression</div>
+          <div class="dim-name">Gross Margin Deterioration</div>
+        </div>
+        <div class="dim-weight">Weight 20%</div>
+      </div>
+      <div class="dim-body">
+        <div class="dim-score-row">
+          <div>
+            <div class="dim-score-big" style="color:var(--stm)">5<span style="font-size:16px;color:var(--ink-4)">/5</span></div>
+          </div>
+          <div>
+            <div class="dim-wtd">Weighted: <span>1.00</span></div>
+            <div class="score-bar-track" style="width:100px;margin-top:5px">
+              <div class="score-bar-fill" style="width:100%;background:var(--stm)"></div>
+            </div>
+          </div>
+        </div>
+        <div class="dim-narrative">GM compressed 14.0pp from peak (47.9% → 33.9%) — largest compression in the group. Operating margin near zero at 1.5% in FY2025. Power &amp; Discrete segment: –30.2% operating margin in Q4 2025.</div>
+        <div class="evidence-chips">
+          <div class="chip chip-a">
+            <div class="chip-icon">🔢</div>
+            <div class="chip-text"><strong>Analysis · Calculated from 10-K</strong>0.49pp GM drop per 1% revenue decline — derived from confirmed 10-K revenue and gross profit figures. Peer comparison is analytical.</div>
+          </div>
+          <div class="chip chip-c">
+            <div class="chip-icon">✅</div>
+            <div class="chip-text"><strong>Confirmed · Q4 2025 Call · CFO Grandi</strong>"Q1 2026 gross margin 33.7% — we believe this is the lowest point of the year." P&amp;D segment –30.2% op margin: from segment disclosure in Q4 earnings.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- D3 Fixed Cost Intensity -->
+    <div class="dim-card">
+      <div class="dim-card-head">
+        <div>
+          <div class="dim-label">D3 · Fixed Cost Intensity</div>
+          <div class="dim-name">PP&amp;E Depreciation Burden</div>
+        </div>
+        <div class="dim-weight">Weight 15%</div>
+      </div>
+      <div class="dim-body">
+        <div class="dim-score-row">
+          <div>
+            <div class="dim-score-big" style="color:var(--stm)">5<span style="font-size:16px;color:var(--ink-4)">/5</span></div>
+          </div>
+          <div>
+            <div class="dim-wtd">Weighted: <span>0.75</span></div>
+            <div class="score-bar-track" style="width:100px;margin-top:5px">
+              <div class="score-bar-fill" style="width:100%;background:var(--stm)"></div>
+            </div>
+          </div>
+        </div>
+        <div class="dim-narrative">PP&amp;E depreciation / revenue rose to 14.9% in FY2025 — the highest in the group. Dep/COGS at 22.5%. Manufacturing reshaping programme underway: 200mm and 150mm SiC fabs being shut down, capacity transitioning to 300mm. Until complete, fixed cost absorption remains painful.</div>
+        <div class="evidence-chips">
+          <div class="chip chip-a">
+            <div class="chip-icon">🔢</div>
+            <div class="chip-text"><strong>Analysis · Calculated from 10-K</strong>PP&amp;E dep $1,753M ÷ revenue $11,800M = 14.9%. Dep ÷ COGS $7,801M = 22.5%. Peer ranking is analytical — based on same calculation across all 5 suppliers.</div>
+          </div>
+          <div class="chip chip-c">
+            <div class="chip-icon">✅</div>
+            <div class="chip-text"><strong>Confirmed · Q4 2025 Call · CFO Grandi</strong>"Manufacturing efficiency improvements from 2027 as 300mm transition completes." Unused capacity charges 220bp in Q1 2026 guidance — confirmed in prepared remarks.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- D4 FCF Pressure -->
+    <div class="dim-card">
+      <div class="dim-card-head">
+        <div>
+          <div class="dim-label">D4 · Cash Flow Pressure</div>
+          <div class="dim-name">Free Cash Flow Stress</div>
+        </div>
+        <div class="dim-weight">Weight 20%</div>
+      </div>
+      <div class="dim-body">
+        <div class="dim-score-row">
+          <div>
+            <div class="dim-score-big" style="color:var(--stm)">4<span style="font-size:16px;color:var(--ink-4)">/5</span></div>
+          </div>
+          <div>
+            <div class="dim-wtd">Weighted: <span>0.80</span></div>
+            <div class="score-bar-track" style="width:100px;margin-top:5px">
+              <div class="score-bar-fill" style="width:80%;background:var(--stm)"></div>
+            </div>
+          </div>
+        </div>
+        <div class="dim-narrative">FCF margin near zero at 2.6% in FY2025 ($308M). Score 4 rather than 5 because STM uniquely carries net cash (net debt negative — no LT debt pressure). However cash generation is minimal and dividend sustainability is a management concern.</div>
+        <div class="evidence-chips">
+          <div class="chip chip-c">
+            <div class="chip-icon">✅</div>
+            <div class="chip-text"><strong>Confirmed · STM 20-F FY2025</strong>FCF $308M (2.6% of revenue). FY2022 peak FCF $1,674M. Net cash confirmed from balance sheet: LT debt $1,835M vs cash + ST investments $3,937M.</div>
+          </div>
+          <div class="chip chip-c">
+            <div class="chip-icon">✅</div>
+            <div class="chip-text"><strong>Confirmed · Q4 2025 Call · CEO Chery</strong>Net CapEx for 2026 planned ~$2.2B. Dividend maintained at current level — no increase guided. These are direct management statements.</div>
+          </div>
+          <div class="chip chip-w">
+            <div class="chip-icon">◆</div>
+            <div class="chip-text"><strong>Working assumption</strong>"Dividend sustainability is a concern" is inference. Management confirmed dividend maintained. No concern was expressed — remove this framing in external use.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- D5 Category Importance -->
+    <div class="dim-card">
+      <div class="dim-card-head">
+        <div>
+          <div class="dim-label">D5 · Category Importance</div>
+          <div class="dim-name">PMIC / LDO Strategic Fit</div>
+        </div>
+        <div class="dim-weight">Weight 15%</div>
+      </div>
+      <div class="dim-body">
+        <div class="dim-score-row">
+          <div>
+            <div class="dim-score-big" style="color:#e8a020">3<span style="font-size:16px;color:var(--ink-4)">/5</span></div>
+          </div>
+          <div>
+            <div class="dim-wtd">Weighted: <span>0.45</span></div>
+            <div class="score-bar-track" style="width:100px;margin-top:5px">
+              <div class="score-bar-fill" style="width:60%;background:#e8a020"></div>
+            </div>
+          </div>
+        </div>
+        <div class="dim-narrative">Power management is material but not STM's primary revenue driver. STM's strategic focus is ADAS ASICs, SiC, MCUs and optical interconnect. PMIC/LDO sits within the Analog, Power &amp; Discrete segment — the very segment currently posting a –30.2% operating margin. Additional volume from buyers directly helps STM recover fixed costs that are otherwise unrecovered in that segment.</div>
+        <div class="evidence-chips">
+          <div class="chip chip-c">
+            <div class="chip-icon">✅</div>
+            <div class="chip-text"><strong>Confirmed · Q4 2025 Earnings · Segment Disclosure</strong>Power &amp; Discrete segment op margin: –30.2% in Q4 2025. Directly from segment result table in earnings release.</div>
+          </div>
+          <div class="chip chip-c">
+            <div class="chip-icon">✅</div>
+            <div class="chip-text"><strong>Confirmed · Q4 2025 Call · CEO Chery</strong>Growth drivers named in prepared remarks: ADAS ASICs, SiC, MCUs, Cloud Optical Interconnect, LEO satellites. PMIC/LDO not mentioned as a growth driver.</div>
+          </div>
+          <div class="chip chip-a">
+            <div class="chip-icon">🔢</div>
+            <div class="chip-text"><strong>Analysis · Derived from segment disclosure</strong>P&amp;D at –30.2% op margin means the segment loses money on each quarter's fixed cost base. Any additional volume sold into P&amp;D absorbs fixed costs that are otherwise unrecovered — confirmed from segment result, fixed cost structure derived from 10-K depreciation data.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- D6 Competitive Alternatives -->
+    <div class="dim-card">
+      <div class="dim-card-head">
+        <div>
+          <div class="dim-label">D6 · Competitive Alternatives</div>
+          <div class="dim-name">Substitution Credibility</div>
+        </div>
+        <div class="dim-weight">Weight 15%</div>
+      </div>
+      <div class="dim-body">
+        <div class="dim-score-row">
+          <div>
+            <div class="dim-score-big" style="color:var(--stm)">4<span style="font-size:16px;color:var(--ink-4)">/5</span></div>
+          </div>
+          <div>
+            <div class="dim-wtd">Weighted: <span>0.60</span></div>
+            <div class="score-bar-track" style="width:100px;margin-top:5px">
+              <div class="score-bar-fill" style="width:80%;background:var(--stm)"></div>
+            </div>
+          </div>
+        </div>
+        <div class="dim-narrative">Multiple qualified alternatives exist for STM PMIC and LDO. TI has short lead times (6–13 weeks) and surplus inventory. IFX and Onsemi also viable. Gate Drivers have fewer direct substitutes (TI and IFX primarily). Score 4 rather than 5 due to qualification costs for some specific parts.</div>
+        <div class="evidence-chips">
+          <div class="chip chip-c">
+            <div class="chip-icon">✅</div>
+            <div class="chip-text"><strong>Confirmed · Source Engine Q4-25 Report</strong>STM Power Management lead times 12–18 weeks, trend STABLE. TI 12–18 weeks STABLE. Onsemi 10–12 weeks STABLE. Direct from Q4-25 Advanced Analog report.</div>
+          </div>
+          <div class="chip chip-c">
+            <div class="chip-icon">✅</div>
+            <div class="chip-text"><strong>Confirmed · TXN Q4 2025 Call · CEO Ilan</strong>"Lead times very competitive, below 13 weeks average, many at 6 weeks — probably the lowest in the industry." Direct quote.</div>
+          </div>
+          <div class="chip chip-w">
+            <div class="chip-icon">◆</div>
+            <div class="chip-text"><strong>Working assumption</strong>Score of 4 rather than 5 "due to qualification costs" is an internal procurement judgement — not sourced. Adjust based on your own qualification status for these parts.</div>
+          </div>
+        </div>
+        <div class="se-signal">
+          <div class="se-icon">⚠</div>
+          <div><strong>Source Engine Signal:</strong> STM is the ONLY supplier in Power Management with a <strong>price-down arrow</strong> for future trend in Q4-25 report. All others show stable. This confirms STM is already moving on pricing.</div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <div class="playbook">
+    <div class="playbook-title">
+      <span style="color:var(--stm)">●</span> Procurement Playbook — STM PMIC / LDO
+    </div>
+    <div class="playbook-grid">
+      <div class="play-item">
+        <div class="play-label">Timing</div>
+        <div class="play-text">Initiate renegotiation in Q1–Q2 2026 before inventory correction completes (end Q2 per CEO). Every quarter of delay reduces leverage as gross margin recovers toward year-end.</div>
+      </div>
+      <div class="play-item">
+        <div class="play-label">Pricing Target</div>
+        <div class="play-text">Lead with Source Engine price-down signal as market benchmark. Target 8–12% reduction on PMIC/LDO. Gate Drivers: 5–8% given fewer alternatives. Use IFX and TI quotes as reference — both stable lead times and available.</div>
+      </div>
+      <div class="play-item">
+        <div class="play-label">Volume Lever</div>
+        <div class="play-text">Offer 12-month volume commitment in exchange for price reduction. P&amp;D segment needs loading — a committed annual volume is a direct contribution to their fixed cost absorption problem.</div>
+      </div>
+      <div class="play-item">
+        <div class="play-label">Payment Terms</div>
+        <div class="play-text">STM DPO is 70 days — they are already stretching payables. Request extended payment terms (Net 60 → Net 75) and early payment discount. Their cash position is thin; DPO extension is a cost-free ask.</div>
+      </div>
+      <div class="play-item">
+        <div class="play-label">Walk-Away Signal</div>
+        <div class="play-text">Use Gate Driver business as the credible walk-away signal. IFX is a direct substitute at stable lead times. Shifting 20% of Gate Driver spend to IFX in Q1 creates urgency without disrupting supply.</div>
+      </div>
+      <div class="play-item">
+        <div class="play-label">Risk Mitigation</div>
+        <div class="play-text">Do not over-concentrate in STM despite leverage. Maintain dual-source qualification for top 5 PMIC parts. STM manufacturing reshaping adds execution risk through 2026 — hedge with TI or IFX buffer stock on critical parts.</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="footer-note">
+    <strong>Scoring methodology:</strong> Six dimensions scored 1–5, weighted by procurement relevance for PMIC/LDO categories. D1 Revenue Cycle 15% · D2 GM Compression 20% · D3 Fixed Cost Intensity 15% · D4 FCF Pressure 20% · D5 Category Importance 15% · D6 Competitive Alternatives 15%.
+    <strong>Data sources:</strong> STM 10-K/20-F FY2020–FY2025 · STM Q4 2025 earnings transcript · Source Engine Q4-25 Advanced Analog lead time report · TXN Q4 2025 earnings transcript.
+    <strong>Disclaimer:</strong> Illustrative framework using public financial data. All spend figures are fictitious.
+  </div>
+
+</div>
+</body>
+</html>
+
+</div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════ -->
+<!-- IFX SCORECARD                                       -->
+<!-- ═══════════════════════════════════════════════════ -->
+<div class="scorecard" id="sc-IFX">
+<div class="main-wrap">
+
+  <div class="source-legend">
+    <div class="sl-item"><div class="sl-swatch sl-c"></div><strong>Confirmed</strong> — 10-K / Annual Report or verbatim transcript</div>
+    <div class="sl-item"><div class="sl-swatch sl-a"></div><strong>Analysis</strong> — calculated from confirmed data</div>
+    <div class="sl-item"><div class="sl-swatch sl-w"></div><strong>Working assumption</strong> — inference, not directly sourced</div>
+  </div>
+
+  <div class="hero-strip" style="border-left:4px solid var(--ifx)">
+    <div style="text-align:center;min-width:78px">
+      <div class="hero-score-num" style="color:var(--ifx)">3.55</div>
+      <div class="hero-score-denom">/5.00</div>
+      <div class="hero-score-label">Leverage Index</div>
+      <div class="score-bar-track" style="width:78px;margin:8px auto 0"><div class="score-bar-fill" style="width:71%;background:var(--ifx)"></div></div>
+    </div>
+    <div>
+      <div class="hero-verdict">#2 of 5 suppliers — Significant leverage, window narrowing as PSS recovers</div>
+      <div class="hero-body">IFX posted its worst operating margin in years — 10.3% in FY2025 — after the automotive and industrial destocking cycle hit simultaneously with Kulim and Dresden CapEx peaking. The PSS segment covering power management saw sustained price declines and underutilisation. However, the Q1 FY2026 transcript signals early recovery: PSS margin improved from 14.5% to 17.4% on AI data centre mix, and order backlog grew €1B QoQ. Leverage is real but contracting. The Q1–Q2 2026 window is the priority for IFX negotiations before the recovery firms up.</div>
+    </div>
+    <div class="hero-meta">
+      <div><div class="meta-label">Action</div><div class="action-pill act-negotiate">NEGOTIATE NOW</div></div>
+      <div><div class="meta-label">Trend</div><div class="meta-val" style="color:#e8a020">↑ Recovering</div></div>
+      <div><div class="meta-label">Sources</div><div style="font-size:11px;color:var(--ink-3)">IFX Annual Report FY2025<br>IFX Q1 FY2026 Transcript<br>Source Engine Q4-25</div></div>
+    </div>
+  </div>
+
+  <div class="rank-strip">
+    <div class="rank-card"><div class="rank-num">#1</div><div class="rank-name">STM</div><div class="rank-score" style="color:var(--stm)">4.55</div><div class="rank-tag">Act now</div></div>
+    <div class="rank-card current" style="--current-color:var(--ifx)"><div class="rank-num">#2</div><div class="rank-name">IFX</div><div class="rank-score" style="color:var(--ifx)">3.55</div><div class="rank-tag">Current supplier</div></div>
+    <div class="rank-card"><div class="rank-num">#3</div><div class="rank-name">TXN</div><div class="rank-score" style="color:var(--ti)">3.30</div><div class="rank-tag">Window open</div></div>
+    <div class="rank-card"><div class="rank-num">#4</div><div class="rank-name">NXP</div><div class="rank-score" style="color:var(--nxp)">1.85</div><div class="rank-tag">Recovering</div></div>
+    <div class="rank-card"><div class="rank-num">#5</div><div class="rank-name">ADI</div><div class="rank-score" style="color:var(--adi)">1.75</div><div class="rank-tag">Low leverage</div></div>
+  </div>
+
+  <div class="window-bar">
+    <div class="window-seg active"><div class="window-seg-label" style="color:var(--ifx)">● Now (Q1–Q2 2026)</div><div class="window-seg-val">PSS margin still recovering · CapEx cycle peak passed · FCF negative in Q1 FY2026</div></div>
+    <div class="window-seg"><div class="window-seg-label">Q3–Q4 2026</div><div class="window-seg-val">Kulim ramp improves utilisation · backlog growth signals volume recovery</div></div>
+    <div class="window-seg"><div class="window-seg-label">FY2027 Onwards</div><div class="window-seg-val">Window closes · Dresden Smart Fab online · AI power revenue builds</div></div>
+  </div>
+
+  <div class="sec-title">Six-Dimension Weighted Scoring</div>
+  <div class="dim-grid">
+
+    <div class="dim-card">
+      <div class="dim-card-head"><div><div class="dim-label">D1 · Revenue Cycle Pressure</div><div class="dim-name">Cyclical Revenue Distress</div></div><div class="dim-weight">Weight 15%</div></div>
+      <div class="dim-body">
+        <div class="dim-score-row"><div><div class="dim-score-big" style="color:#e8a020">3<span style="font-size:14px;color:var(--ink-4)">/5</span></div></div><div><div class="dim-wtd">Weighted: <span>0.45</span></div><div class="score-bar-track" style="width:100px;margin-top:4px"><div class="score-bar-fill" style="width:60%;background:var(--ifx)"></div></div></div></div>
+        <div class="dim-narrative">Revenue -8.3% FY2024, modest recovery +2.25% FY2025 (USD equivalent). Score 3 rather than 5: IFX never saw the sharp peak-to-trough collapse of STM. FY2023 was a revenue record. Downward cycle was shallower.</div>
+        <div class="evidence-chips">
+          <div class="chip chip-c"><div class="chip-icon">✅</div><div class="chip-text"><strong>Confirmed · IFX Annual Report FY2025</strong>FY2023 revenue peak €16.3B → FY2025 €14.7B = –10% from peak. USD equivalent down 8.3% FY2024 then +2.25% FY2025.</div></div>
+          <div class="chip chip-c"><div class="chip-icon">✅</div><div class="chip-text"><strong>Confirmed · IFX Q1 FY2026 Transcript</strong>Q1 FY2026 revenue €3,662M, +7% YoY. Order backlog grew €1B QoQ. Recovery underway — reduces D1 leverage forward.</div></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="dim-card">
+      <div class="dim-card-head"><div><div class="dim-label">D2 · Margin Compression</div><div class="dim-name">Gross Margin Deterioration</div></div><div class="dim-weight">Weight 20%</div></div>
+      <div class="dim-body">
+        <div class="dim-score-row"><div><div class="dim-score-big" style="color:var(--ifx)">4<span style="font-size:14px;color:var(--ink-4)">/5</span></div></div><div><div class="dim-wtd">Weighted: <span>0.80</span></div><div class="score-bar-track" style="width:100px;margin-top:4px"><div class="score-bar-fill" style="width:80%;background:var(--ifx)"></div></div></div></div>
+        <div class="dim-narrative">GM compressed 6.3pp from peak (45.5%→39.2%). OM from 24.2% to 10.3%. PSS segment (power management) specifically cited price declines at low-to-mid single digit rates. Not yet recovery territory for the power segment specifically.</div>
+        <div class="evidence-chips">
+          <div class="chip chip-c"><div class="chip-icon">✅</div><div class="chip-text"><strong>Confirmed · IFX Annual Report FY2025</strong>GM 45.5% (FY2023) → 39.2% (FY2025). OM 24.2% → 10.3%. Both confirmed from income statement.</div></div>
+          <div class="chip chip-c"><div class="chip-icon">✅</div><div class="chip-text"><strong>Confirmed · IFX Q1 FY2026 Transcript</strong>PSS segment margin improved 14.5%→17.4% on AI data centre mix shift. "Price declines in low-to-mid single digit range" — management statement Q1 FY2026.</div></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="dim-card">
+      <div class="dim-card-head"><div><div class="dim-label">D3 · Fixed Cost Intensity</div><div class="dim-name">PP&amp;E Depreciation Burden</div></div><div class="dim-weight">Weight 15%</div></div>
+      <div class="dim-body">
+        <div class="dim-score-row"><div><div class="dim-score-big" style="color:var(--ifx)">4<span style="font-size:14px;color:var(--ink-4)">/5</span></div></div><div><div class="dim-wtd">Weighted: <span>0.60</span></div><div class="score-bar-track" style="width:100px;margin-top:4px"><div class="score-bar-fill" style="width:80%;background:var(--ifx)"></div></div></div></div>
+        <div class="dim-narrative">Dep/Revenue at 10.3%, Dep/COGS at 16.9% — second highest in the group after TXN and STM. Kulim (300mm, €2B+ investment) and Dresden Smart Power Fab are generating heavy depreciation that must be absorbed through volume.</div>
+        <div class="evidence-chips">
+          <div class="chip chip-a"><div class="chip-icon">🔢</div><div class="chip-text"><strong>Analysis · Calculated from Annual Report</strong>PP&amp;E depreciation proxy $1,703M ÷ revenue $16,549M = 10.3%. Dep ÷ COGS = 16.9%. Derived from confirmed financials using IRS FX rates.</div></div>
+          <div class="chip chip-c"><div class="chip-icon">✅</div><div class="chip-text"><strong>Confirmed · IFX Q1 FY2026 Transcript</strong>CapEx FY2026 planned €2.7B. Kulim high-volume module started in FY2025. Dresden Smart Power Fab under construction — both adding to depreciation base.</div></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="dim-card">
+      <div class="dim-card-head"><div><div class="dim-label">D4 · Cash Flow Pressure</div><div class="dim-name">Free Cash Flow Stress</div></div><div class="dim-weight">Weight 20%</div></div>
+      <div class="dim-body">
+        <div class="dim-score-row"><div><div class="dim-score-big" style="color:var(--ifx)">4<span style="font-size:14px;color:var(--ink-4)">/5</span></div></div><div><div class="dim-wtd">Weighted: <span>0.80</span></div><div class="score-bar-track" style="width:100px;margin-top:4px"><div class="score-bar-fill" style="width:80%;background:var(--ifx)"></div></div></div></div>
+        <div class="dim-narrative">FCF margin 9.4% FY2025, but Q1 FY2026 FCF was negative at –€199M. IFX carries significant long-term debt (~€5.8B). The combination of high CapEx, negative quarterly FCF and rising net debt (€4.7B→€5.0B) creates genuine cash pressure.</div>
+        <div class="evidence-chips">
+          <div class="chip chip-c"><div class="chip-icon">✅</div><div class="chip-text"><strong>Confirmed · IFX Q1 FY2026 Transcript</strong>Q1 FY2026 Free Cash Flow –€199M (negative). Adjusted FCF €1.8B for full FY2025 = 12.3% of revenue — management's own definition excludes major building investments.</div></div>
+          <div class="chip chip-a"><div class="chip-icon">🔢</div><div class="chip-text"><strong>Analysis · IFX Annual Report FY2025</strong>Reported FCF (OCF – CapEx PP&amp;E) = €1,378M = 9.4% margin. Net debt rose from €2.7B (FY2023) to €5.0B (FY2025) as Kulim investments were financed.</div></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="dim-card">
+      <div class="dim-card-head"><div><div class="dim-label">D5 · Category Importance</div><div class="dim-name">PMIC / LDO Strategic Fit</div></div><div class="dim-weight">Weight 15%</div></div>
+      <div class="dim-body">
+        <div class="dim-score-row"><div><div class="dim-score-big" style="color:#e8a020">3<span style="font-size:14px;color:var(--ink-4)">/5</span></div></div><div><div class="dim-wtd">Weighted: <span>0.45</span></div><div class="score-bar-track" style="width:100px;margin-top:4px"><div class="score-bar-fill" style="width:60%;background:#e8a020)"></div></div></div></div>
+        <div class="dim-narrative">Power management sits within IFX's PSS (Power &amp; Sensor Systems) segment. PSS is a recovering but important segment. IFX has a €1.5B AI power revenue target for FY2026 — capacity-constrained. This means IFX has selective leverage too: they may prioritise AI power customers over commodity PMIC volumes.</div>
+        <div class="evidence-chips">
+          <div class="chip chip-c"><div class="chip-icon">✅</div><div class="chip-text"><strong>Confirmed · IFX Q1 FY2026 Transcript</strong>AI power target €1.5B for FY2026 "capacity-constrained." PSS margin improvement from AI mix shift — explicitly stated by management.</div></div>
+          <div class="chip chip-w"><div class="chip-icon">◆</div><div class="chip-text"><strong>Working assumption</strong>IFX may deprioritise commodity PMIC/LDO in favour of higher-margin AI power accounts. This is an inference from the AI power capacity constraint — not stated explicitly by management.</div></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="dim-card">
+      <div class="dim-card-head"><div><div class="dim-label">D6 · Competitive Alternatives</div><div class="dim-name">Substitution Credibility</div></div><div class="dim-weight">Weight 15%</div></div>
+      <div class="dim-body">
+        <div class="dim-score-row"><div><div class="dim-score-big" style="color:#e8a020">3<span style="font-size:14px;color:var(--ink-4)">/5</span></div></div><div><div class="dim-wtd">Weighted: <span>0.45</span></div><div class="score-bar-track" style="width:100px;margin-top:4px"><div class="score-bar-fill" style="width:60%;background:#e8a020"></div></div></div></div>
+        <div class="dim-narrative">For Gate Drivers, IFX is the market leader with the broadest Si/SiC/GaN portfolio — alternatives (TI, STM) exist but require qualification effort. For PMIC/LDO, TI and STM are credible alternatives with stable availability. Score 3 reflects Gate Driver switching friction partially offsetting PMIC substitutability.</div>
+        <div class="evidence-chips">
+          <div class="chip chip-c"><div class="chip-icon">✅</div><div class="chip-text"><strong>Confirmed · Source Engine Q4-25</strong>IFX Power Management lead times 14–18 weeks, trend STABLE. TI 12–18 weeks STABLE. STM 12–18 weeks with price-down signal. Alternatives available now.</div></div>
+          <div class="chip chip-w"><div class="chip-icon">◆</div><div class="chip-text"><strong>Working assumption</strong>Gate Driver qualification friction scoring D6 down from 4 to 3 is a procurement judgement based on typical qualification timelines. Adjust based on your own qualification status.</div></div>
+        </div>
+        <div class="chip chip-se" style="margin-top:8px;border-radius:5px;padding:6px 8px;font-size:10.5px;line-height:1.5;">
+          <div class="chip-icon">⚠</div>
+          <div><strong>Source Engine Q4-25:</strong> IFX price trend <strong>STABLE</strong> — not yet showing the price-down signal that STM is. This reduces urgency vs STM but leverage window is still open given margin pressure.</div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <div class="playbook" style="border-left-color:var(--ifx)">
+    <div class="playbook-title"><span style="color:var(--ifx)">●</span> Procurement Playbook — IFX PMIC / LDO / Gate Drivers</div>
+    <div class="playbook-grid">
+      <div class="play-item"><div class="play-label" style="color:#333">Timing</div><div class="play-text">Act in Q1–Q2 2026 before PSS margin recovery firms. Q1 FY2026 FCF is negative — maximum financial pressure now. Every quarter of delay reduces leverage as Kulim ramp improves utilisation.</div></div>
+      <div class="play-item"><div class="play-label" style="color:#333">Pricing Target <span style="font-size:9px;font-weight:400;color:var(--assumption);font-family:var(--mono)">◆</span></div><div class="play-text">3–6% target on PMIC/LDO, anchored to confirmed low-to-mid single digit declines per IFX management. Gate Drivers: tighter, 2–4% given IFX market leadership. Use STM price-down as market context.</div></div>
+      <div class="play-item"><div class="play-label" style="color:#333">Gate Driver Leverage</div><div class="play-text">IFX carries 61% of your Gate Driver spend ($6.2M). This is your primary volume lever. A 12-month commitment on Gate Driver volume gives IFX fixed cost absorption they need without you conceding on price.</div></div>
+      <div class="play-item"><div class="play-label" style="color:#333">AI Power Risk <span style="font-size:9px;font-weight:400;color:var(--assumption);font-family:var(--mono)">◆</span></div><div class="play-text">IFX's AI power capacity constraint could mean they de-prioritise your PMIC volumes. Consider asking IFX to confirm supply allocations for your PMIC/LDO as part of any new agreement — this protects you if IFX shifts capacity to AI customers.</div></div>
+      <div class="play-item"><div class="play-label" style="color:#333">Payment Terms</div><div class="play-text">IFX DPO is 82 days and net debt is rising. Requesting Net 60→75 and early payment discount (0.5–1%) on Gate Driver invoices is a low-friction ask given their cash position.</div></div>
+      <div class="play-item"><div class="play-label" style="color:#333">Risk Mitigation</div><div class="play-text">IFX's manufacturing reshaping (200mm SiC to Kulim, Dresden Smart Fab) creates execution risk through 2026. Maintain qualified backup for top 3 PMIC/LDO part numbers. TI or STM for PMIC; TI for Gate Drivers as hedge.</div></div>
+    </div>
+  </div>
+
+  <div class="footer-note"><strong>Scoring:</strong> D1 Revenue Cycle 15% · D2 GM Compression 20% · D3 Fixed Cost Intensity 15% · D4 FCF Pressure 20% · D5 Category Importance 15% · D6 Competitive Alternatives 15%. <strong>Sources:</strong> Infineon Technologies AG Annual Report FY2025 · IFX Q1 FY2026 Earnings Transcript · Source Engine Q4-25 Advanced Analog. <strong>Note:</strong> IFX reports in EUR / FY ends Sep 30. Financial figures converted to USD using IRS yearly average rates.</div>
+</div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════ -->
+<!-- TXN SCORECARD                                       -->
+<!-- ═══════════════════════════════════════════════════ -->
+
+
+<!-- ═══════════════════════════════════════════════════ -->
+<!-- NXP SCORECARD                                       -->
+<!-- ═══════════════════════════════════════════════════ -->
+
+
+<!-- ═══════════════════════════════════════════════════ -->
+<!-- ADI SCORECARD                                       -->
+<!-- ═══════════════════════════════════════════════════ -->
+
+
+<script>
+function showSupplier(key, clickedTab) {
+  // Hide all scorecards
+  document.querySelectorAll('.scorecard').forEach(s => s.classList.remove('active'));
+  // Remove active from all tabs
+  document.querySelectorAll('.sup-tab').forEach(t => t.classList.remove('active'));
+  // Show selected
+  document.getElementById('sc-'+key).classList.add('active');
+  clickedTab.classList.add('active');
+  // Set CSS variable for border colour on active tab
+  clickedTab.style.setProperty('--current-color', getComputedStyle(document.documentElement).getPropertyValue('--'+key.toLowerCase()));
+}
+
+// Initialise first tab
+document.querySelector('.sup-tab').dispatchEvent(new MouseEvent('click'));
+</script>
+</body>
+</html>

@@ -1,0 +1,527 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>IOpened — Supplier Intelligence POC</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Fraunces:ital,wght@0,300;0,600;1,300&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg: #0d0f14;
+    --surface: #13161e;
+    --surface2: #1a1e28;
+    --border: rgba(255,255,255,0.07);
+    --gold: #c9a84c;
+    --gold-dim: rgba(201,168,76,0.15);
+    --gold-glow: rgba(201,168,76,0.08);
+    --ink: #e8eaf0;
+    --ink-2: #9ca3b0;
+    --ink-3: #5c6270;
+    --green: #4ade80;
+    --red: #f87171;
+  }
+
+  body {
+    background: var(--bg);
+    color: var(--ink);
+    font-family: 'DM Sans', sans-serif;
+    font-weight: 300;
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* ── Background texture ── */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background:
+      radial-gradient(ellipse 80% 50% at 50% -10%, rgba(201,168,76,0.07) 0%, transparent 60%),
+      radial-gradient(ellipse 40% 30% at 80% 80%, rgba(201,168,76,0.04) 0%, transparent 50%);
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  /* ── Grid lines ── */
+  body::after {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image:
+      linear-gradient(rgba(255,255,255,0.015) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(255,255,255,0.015) 1px, transparent 1px);
+    background-size: 60px 60px;
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  .wrap {
+    position: relative;
+    z-index: 1;
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 80px 32px 60px;
+  }
+
+  /* ── Header ── */
+  .logo-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 56px;
+    animation: fadeUp 0.6s ease both;
+  }
+
+  .logo-mark {
+    width: 36px;
+    height: 36px;
+    border: 1.5px solid var(--gold);
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: 'DM Mono', monospace;
+    font-size: 14px;
+    color: var(--gold);
+    font-weight: 500;
+  }
+
+  .logo-text {
+    font-family: 'DM Mono', monospace;
+    font-size: 15px;
+    font-weight: 500;
+    color: var(--ink);
+    letter-spacing: 0.05em;
+  }
+
+  .logo-text span { color: var(--gold); }
+
+  .poc-badge {
+    margin-left: auto;
+    font-family: 'DM Mono', monospace;
+    font-size: 10px;
+    color: var(--gold);
+    border: 1px solid rgba(201,168,76,0.3);
+    padding: 4px 10px;
+    border-radius: 4px;
+    letter-spacing: 0.08em;
+    background: var(--gold-glow);
+  }
+
+  /* ── Hero ── */
+  .hero {
+    margin-bottom: 56px;
+    animation: fadeUp 0.6s 0.1s ease both;
+  }
+
+  .hero-eyebrow {
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    color: var(--gold);
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    margin-bottom: 16px;
+  }
+
+  .hero-title {
+    font-family: 'Fraunces', Georgia, serif;
+    font-size: clamp(28px, 4vw, 44px);
+    font-weight: 300;
+    line-height: 1.2;
+    color: var(--ink);
+    margin-bottom: 20px;
+  }
+
+  .hero-title em {
+    font-style: italic;
+    color: var(--gold);
+  }
+
+  .hero-body {
+    font-size: 15px;
+    line-height: 1.7;
+    color: var(--ink-2);
+    max-width: 600px;
+  }
+
+  /* ── Context strip ── */
+  .context-strip {
+    display: flex;
+    gap: 0;
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    overflow: hidden;
+    margin-bottom: 48px;
+    animation: fadeUp 0.6s 0.2s ease both;
+  }
+
+  .ctx-item {
+    flex: 1;
+    padding: 16px 20px;
+    border-right: 1px solid var(--border);
+  }
+
+  .ctx-item:last-child { border-right: none; }
+
+  .ctx-label {
+    font-family: 'DM Mono', monospace;
+    font-size: 9px;
+    color: var(--ink-3);
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    margin-bottom: 6px;
+  }
+
+  .ctx-value {
+    font-size: 13px;
+    color: var(--ink);
+    font-weight: 400;
+  }
+
+  .ctx-value strong {
+    color: var(--gold);
+    font-weight: 500;
+  }
+
+  /* ── Section label ── */
+  .section-label {
+    font-family: 'DM Mono', monospace;
+    font-size: 10px;
+    color: var(--ink-3);
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    margin-bottom: 16px;
+    animation: fadeUp 0.6s 0.3s ease both;
+  }
+
+  /* ── Nav grid ── */
+  .nav-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+    margin-bottom: 48px;
+    animation: fadeUp 0.6s 0.35s ease both;
+  }
+
+  .nav-card {
+    display: block;
+    text-decoration: none;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 22px 24px;
+    transition: border-color 0.2s, background 0.2s, transform 0.2s;
+    cursor: pointer;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .nav-card::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: var(--gold-glow);
+    opacity: 0;
+    transition: opacity 0.2s;
+  }
+
+  .nav-card:hover {
+    border-color: rgba(201,168,76,0.35);
+    background: var(--surface2);
+    transform: translateY(-2px);
+  }
+
+  .nav-card:hover::before { opacity: 1; }
+
+  .nav-card:hover .nav-arrow { opacity: 1; transform: translate(2px, -2px); }
+
+  .nav-num {
+    font-family: 'DM Mono', monospace;
+    font-size: 10px;
+    color: var(--gold);
+    letter-spacing: 0.1em;
+    margin-bottom: 10px;
+    opacity: 0.8;
+  }
+
+  .nav-title {
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--ink);
+    margin-bottom: 6px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .nav-arrow {
+    margin-left: auto;
+    opacity: 0.3;
+    transition: opacity 0.2s, transform 0.2s;
+    font-size: 16px;
+    color: var(--gold);
+  }
+
+  .nav-desc {
+    font-size: 12px;
+    color: var(--ink-3);
+    line-height: 1.5;
+  }
+
+  .nav-tags {
+    display: flex;
+    gap: 6px;
+    flex-wrap: wrap;
+    margin-top: 12px;
+  }
+
+  .tag {
+    font-family: 'DM Mono', monospace;
+    font-size: 9px;
+    padding: 3px 7px;
+    border-radius: 3px;
+    background: rgba(255,255,255,0.04);
+    color: var(--ink-3);
+    border: 1px solid var(--border);
+    letter-spacing: 0.05em;
+  }
+
+  /* ── Pitch link ── */
+  .pitch-row {
+    animation: fadeUp 0.6s 0.4s ease both;
+  }
+
+  .pitch-card {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    background: var(--gold-dim);
+    border: 1px solid rgba(201,168,76,0.25);
+    border-radius: 10px;
+    padding: 18px 24px;
+    text-decoration: none;
+    transition: background 0.2s, border-color 0.2s;
+  }
+
+  .pitch-card:hover {
+    background: rgba(201,168,76,0.2);
+    border-color: rgba(201,168,76,0.4);
+  }
+
+  .pitch-icon {
+    font-size: 20px;
+    flex-shrink: 0;
+  }
+
+  .pitch-text { flex: 1; }
+
+  .pitch-title {
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--gold);
+    margin-bottom: 3px;
+  }
+
+  .pitch-sub {
+    font-size: 11px;
+    color: var(--ink-3);
+  }
+
+  .pitch-arrow {
+    font-size: 18px;
+    color: var(--gold);
+    opacity: 0.6;
+  }
+
+  /* ── Disclaimer ── */
+  .disclaimer {
+    margin-top: 48px;
+    padding-top: 24px;
+    border-top: 1px solid var(--border);
+    font-family: 'DM Mono', monospace;
+    font-size: 10px;
+    color: var(--ink-3);
+    line-height: 1.6;
+    animation: fadeUp 0.6s 0.5s ease both;
+  }
+
+  .disclaimer strong { color: var(--ink-2); }
+
+  /* ── Evidence legend ── */
+  .evidence-row {
+    display: flex;
+    gap: 16px;
+    flex-wrap: wrap;
+    margin-top: 40px;
+    margin-bottom: 0;
+    animation: fadeUp 0.6s 0.45s ease both;
+  }
+
+  .ev-item {
+    display: flex;
+    align-items: center;
+    gap:6px;
+    font-family: 'DM Mono', monospace;
+    font-size: 10px;
+    color: var(--ink-3);
+  }
+
+  .ev-dot {
+    width: 8px; height: 8px; border-radius: 50%;
+    flex-shrink: 0;
+  }
+
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(16px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  @media (max-width: 600px) {
+    .nav-grid { grid-template-columns: 1fr; }
+    .context-strip { flex-direction: column; }
+    .ctx-item { border-right: none; border-bottom: 1px solid var(--border); }
+    .ctx-item:last-child { border-bottom: none; }
+    .wrap { padding: 48px 20px 40px; }
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <!-- Logo -->
+  <div class="logo-row">
+    <div class="logo-mark">IO</div>
+    <div class="logo-text">I<span>Opened</span></div>
+    <div class="poc-badge">PROOF OF CONCEPT</div>
+  </div>
+
+  <!-- Hero -->
+  <div class="hero">
+    <div class="hero-eyebrow">Supplier Intelligence · Power Management ICs</div>
+    <h1 class="hero-title">Procurement intelligence<br>for <em>semiconductor negotiations</em></h1>
+    <p class="hero-body">
+      This is a proof of concept built for a fictitious company — <strong style="color:var(--ink)">ABC Semiconductor</strong> — spending approximately $28M annually on power management ICs across five suppliers. All financial data is sourced from public filings (10-K / 20-F) and earnings transcripts. Intelligence is spend-specific and tied to actual MPN-level procurement.
+    </p>
+  </div>
+
+  <!-- Context strip -->
+  <div class="context-strip">
+    <div class="ctx-item">
+      <div class="ctx-label">Fictitious Buyer</div>
+      <div class="ctx-value"><strong>ABC Semiconductor</strong></div>
+    </div>
+    <div class="ctx-item">
+      <div class="ctx-label">Annual Spend</div>
+      <div class="ctx-value"><strong>$28.05M</strong> · Power Mgmt ICs</div>
+    </div>
+    <div class="ctx-item">
+      <div class="ctx-label">Suppliers Covered</div>
+      <div class="ctx-value"><strong>TI · NXP · IFX · STM · ADI</strong></div>
+    </div>
+    <div class="ctx-item">
+      <div class="ctx-label">Data Period</div>
+      <div class="ctx-value">FY2020 – <strong>FY2025</strong></div>
+    </div>
+  </div>
+
+  <!-- Dashboard pages -->
+  <div class="section-label">Dashboard Pages</div>
+  <div class="nav-grid">
+
+    <a class="nav-card" href="spend_page1.html">
+      <div class="nav-num">01 — SPEND</div>
+      <div class="nav-title">Spend Distribution <span class="nav-arrow">↗</span></div>
+      <div class="nav-desc">Spend breakdown by supplier and category. Geographic concentration, HHI risk scoring and supplier dependency analysis.</div>
+      <div class="nav-tags">
+        <span class="tag">$28M spend</span>
+        <span class="tag">HHI risk</span>
+        <span class="tag">5 suppliers</span>
+      </div>
+    </a>
+
+    <a class="nav-card" href="financials_page2_lite.html">
+      <div class="nav-num">02 — FINANCIALS</div>
+      <div class="nav-title">Financial Analytics <span class="nav-arrow">↗</span></div>
+      <div class="nav-desc">GM Sensitivity, free cash flow, depreciation burden and fixed cost intensity per supplier. FY2020–FY2025 trend with year-by-year annotations.</div>
+      <div class="nav-tags">
+        <span class="tag">GM sensitivity</span>
+        <span class="tag">FCF</span>
+        <span class="tag">dep/COGS</span>
+      </div>
+    </a>
+
+    <a class="nav-card" href="scorecard_lite.html">
+      <div class="nav-num">03 — SCORECARD</div>
+      <div class="nav-title">Negotiation Leverage <span class="nav-arrow">↗</span></div>
+      <div class="nav-desc">Per-supplier leverage scoring with recommended negotiation posture, timing rationale and evidence-graded data points to cite in the room.</div>
+      <div class="nav-tags">
+        <span class="tag">ACT NOW</span>
+        <span class="tag">NEGOTIATE</span>
+        <span class="tag">MONITOR</span>
+      </div>
+    </a>
+
+    <a class="nav-card" href="fab_footprint_page4.html">
+      <div class="nav-num">04 — FAB FOOTPRINT</div>
+      <div class="nav-title">Fab Footprint &amp; Risk <span class="nav-arrow">↗</span></div>
+      <div class="nav-desc">Wafer size migration, process node by product category, JV dependencies and TSMC exposure. Supply chain risk as a negotiation argument.</div>
+      <div class="nav-tags">
+        <span class="tag">300mm</span>
+        <span class="tag">TSMC</span>
+        <span class="tag">JV risk</span>
+      </div>
+    </a>
+
+    <a class="nav-card" href="china_competition_page5.html">
+      <div class="nav-num">05 — CHINA</div>
+      <div class="nav-title">China Competition <span class="nav-arrow">↗</span></div>
+      <div class="nav-desc">Domestic supplier threat level and technology readiness by product category. MOFCOM anti-dumping alerts and market share trajectory.</div>
+      <div class="nav-tags">
+        <span class="tag">YMTC</span>
+        <span class="tag">Southchip</span>
+        <span class="tag">threat level</span>
+      </div>
+    </a>
+
+    <a class="nav-card" href="iopened_pricing_spread.html">
+      <div class="nav-num">06 — PRICING</div>
+      <div class="nav-title">Distributor Pricing <span class="nav-arrow">↗</span></div>
+      <div class="nav-desc">Authorised distributor price ranges vs direct supplier pricing across 15 MPNs. Grey market broker flags and spread analysis by category.</div>
+      <div class="nav-tags">
+        <span class="tag">15 MPNs</span>
+        <span class="tag">direct vs dist</span>
+        <span class="tag">grey market</span>
+      </div>
+    </a>
+
+  </div>
+
+  <!-- Pitch deck link -->
+  <div class="pitch-row">
+    <a class="pitch-card" href="iopenspend_pitch.html">
+      <div class="pitch-icon">📋</div>
+      <div class="pitch-text">
+        <div class="pitch-title">IOpened — Value Proposition</div>
+        <div class="pitch-sub">What the tool is, what it is not, and how it creates value for commodity managers</div>
+      </div>
+      <div class="pitch-arrow">→</div>
+    </a>
+  </div>
+
+  <!-- Evidence legend -->
+  <div class="evidence-row">
+    <div class="ev-item"><div class="ev-dot" style="background:#4ade80"></div>✅ Confirmed from filing</div>
+    <div class="ev-item"><div class="ev-dot" style="background:#c9a84c"></div>🔢 Derived from analysis</div>
+    <div class="ev-item"><div class="ev-dot" style="background:#60a5fa"></div>◆ Working assumption</div>
+  </div>
+
+  <!-- Disclaimer -->
+  <div class="disclaimer">
+    <strong>Disclaimer:</strong> This is a proof of concept built on a fictitious buyer ("ABC Semiconductor") with illustrative spend data. All supplier financial data is sourced from public filings (SEC 10-K, 20-F) and earnings transcripts. This tool does not constitute financial advice. In a live engagement, spend data, MPN mapping and supplier relationships would be specific to the actual client — materially improving the accuracy and relevance of all intelligence shown.
+  </div>
+
+</div>
+</body>
+</html>
